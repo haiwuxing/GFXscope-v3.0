@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GFXscope</string>
+    <string name="action_settings">Настройки</string>
+
+     <string-array name="u_ch1">
+        <item>off</item>
+        <item>50</item>
+        <item>20</item>
+        <item>10</item>
+        <item>5</item>
+        <item>2</item>
+        <item>1</item>
+        <item>0.5</item>
+    </string-array>
+    
+    
+    <!-- ************************** ДИАЛОГОВЫЕ ОКНА ************************** -->
+    <!-- КНОПКИ -->
+    <string name="dialog_ok">ОК</string>
+    <string name="dialog_yes">Да</string>
+    <string name="dialog_no">Нет</string>
+    <string name="dialog_cancel">Отмена</string>
+
+    <string name="bt_left">&lt;</string>   
+    <string name="bt_right">&gt;</string>
+    
+    <string name="ipadress">192.168.1.67</string>    
+    
+    <!-- ФРАГМЕНТ "НАСТРОЙКИ" -->
+    <string name="PreferencesSaveWurfs">Вывод графика тип мин-макс</string>
+    <string name="PreferencesSaveWurfsExplanation">Не усреднять </string>
+    
+    <!-- НАЗВАНИЯ ФРАГМЕНТОВ ДЛЯ ИСПОЛЬЗОВАНИЯ В КОДЕ ВМЕСТО СТРОК -->
+    <string name="fragment_main">fragment_main</string>
+    <string name="fragment_top10">fragment_top10</string>
+    <string name="fragment_settings">fragment_settings</string>
+    <string name="fragment_about">fragment_about</string>
+
+    <!-- TOAST ДЛЯ СЛУЧАЯ, КОГДА НЕ ВЫБРАН НИ ОДИН ПУНКТ МЕНЮ (MainActivity) -->
+    <string name="You_did_not_select_any_menu_item">Вы не выбрали ни одного пункта меню</string>
+    <string name="start">Старт</string>
+    <string name="CH1avr">CH1avr</string>
+    <string name="CH1rms">CH1rms</string>
+    <string name="CH1pp">CH1p-p</string>
+    <string name="CH1freq">CH1freq</string>
+    <string name="CH1dc">CH1dc</string>
+    <string name="CH2avr">CH2avr</string>
+    <string name="CH2rms">CH2rms</string>
+    <string name="CH2pp">CH2p-p</string>
+    <string name="CH2freq">CH2freq</string>
+    <string name="CH2dc">CH2dc</string>
+    <string name="Start">Старт</string>
+    <string name="timedel">Время на деление</string>
+    <string name="CH1">CH1</string>
+    <string name="CH2">CH2</string>
+    <string name="syncauto">Sync auto</string>
+    <string name="front">Фронт</string>
+    <string name="fall">Спад</string>
+    <string name="front_wait">Ждущий фронт</string>
+    <string name="fall_wait">Ждущий спад</string>
+    <string name="T_auto">auto</string>
+    <string name="CH1_auto">auto</string>
+    <string name="CH2_auto">auto</string>
+    <string name="Tminus">T-</string>
+    <string name="CH1minus">-</string>
+    <string name="CH2minus">-</string>
+    <string name="time">500n</string>
+    <string name="u_ch1_text">1V</string>
+    <string name="u_ch2_text">1V</string>
+    <string name="Tplus">T+</string>
+    <string name="CH1plus">+</string>
+    <string name="CH2plus">+</string>
+    <string name="CH1ACDC">AC</string>
+    <string name="CH2ACDC">AC</string>
+    <string name="IPadres">IP адрес</string>
+    <string name="Interlive">Interlive</string>
+    <string name="bitrate"></string>
+    <string name="exit">Выход</string> 
+    <string name="set_ip_adress">Применить</string> 
+    <string name="pause">Play</string> 
+    <string name="CHauto">auto</string> 
+    <string name="sync_type">front</string> 
+    <string name="menu">Настройки</string> 
+    <string name="back">Назад</string>     
+    <string name="text_reset_null">Калибровка нуля</string>  
+    <string name="set_null">Выполнить</string> 
+    
+    <string name="text_genertor">Настройки генератора</string>   
+    <string name="text_genertor_type">Тип</string>  
+    <string name="genertor_type_off">Выкл</string>       
+    <string name="genertor_type_Sinus">Синус</string>     
+    <string name="genertor_type_Meander">Меандр</string>     
+    <string name="genertor_type_Triagle">Треугольник</string>    
+    <string name="genertor_type_Saw">Пила</string>     
+    <string name="genertor_type_Digital">Пачка имп.</string>   
+    
+    <string name="text_genertor_freq">Частота</string>   
+    <string name="genertor_freq_100">100 Гц</string>  
+    <string name="genertor_freq_1k">1 кГц</string>       
+    <string name="genertor_freq_10k">10 кГц</string>       
+    
+    <string name="text_genertor_Upp">Амплитуда</string>   
+    <string name="text_input_Upp">1</string>      
+    <string name="genertor_set_Upp">Задать</string>    
+    
+    <string name="text_mnojitel_ch1">Множитель СH1</string>   
+    <string name="edit_text_mnojitel_ch1">1.0</string>      
+    <string name="set_mnojitel_ch1">Задать</string>      
+    
+     <string name="text_mnojitel_ch2">Множитель СH2</string>   
+    <string name="edit_text_mnojitel_ch2">1.0</string>      
+    <string name="set_mnojitel_ch2">Задать</string>      
+    <string name="open">Открыть</string>      
+    <string name="save">Сохранить</string>      
+    <string name="ch1plus">CH1</string>      
+    <string name="ch1minus">CH1</string>      
+    <string name="ch2plus">CH2</string>      
+    <string name="ch2minus">CH2</string>      
+    <string name="t_plus">T+</string>      
+    <string name="t_minus">T-</string>      
+    <string name="sync_ch">CH1</string>      
+    <string name="t_free">Free</string>    
+     
+    <string name="text_type_minmax">Тип усреднения</string>     
+    <string name="type_minmax">Среднее</string>    
+    
+</resources>

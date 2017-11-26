@@ -1,0 +1,390 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RootMainLayout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    
+    android:gravity="left" >
+<!-- android:background="@color/fon_graf" -->
+    <TextView
+        android:id="@+id/textViewSettingsip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="7dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/IPadres"
+        android:textColor="@color/White"
+        android:textSize="12sp" />
+
+ <EditText
+     android:id="@+id/text_input_ip_adress"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_toRightOf="@+id/textViewSettingsip"    
+     android:layout_marginLeft="10dp"
+     android:layout_marginTop="2dp"
+     android:text="@string/ipadress"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     android:inputType="text"/>
+
+  <Button
+     android:id="@+id/set_ip_adress"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="5dp"
+     android:layout_marginTop="2dp"
+     android:layout_toRightOf="@+id/text_input_ip_adress"
+     android:text="@string/set_ip_adress"
+     android:textColor="@color/White"     
+     android:textSize="12sp" />
+ 
+   <Button
+     android:id="@+id/back_to_main"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="5dp"
+     android:layout_marginTop="2dp"
+     android:layout_toRightOf="@+id/set_ip_adress"     
+     android:text="@string/back"
+     android:textColor="@color/White"
+     android:textSize="12sp" />
+   
+   
+   
+  <TextView
+     android:id="@+id/text_mnojitel_ch1"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_below="@+id/set_null"
+     android:layout_marginLeft="7dp"
+     android:layout_marginTop="10dp"
+     android:text="@string/text_mnojitel_ch1"
+     android:textColor="@color/White"
+     android:textSize="12sp" />
+
+ <EditText
+     android:id="@+id/edit_text_mnojitel_ch1"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_toRightOf="@+id/text_mnojitel_ch1" 
+     android:layout_alignTop="@+id/set_mnojitel_ch1"
+     android:layout_marginLeft="9dp"
+     android:layout_marginTop="2dp"
+     android:text="@string/edit_text_mnojitel_ch1"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     android:inputType="text"/>
+
+  <Button
+     android:id="@+id/set_mnojitel_ch1"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_below="@+id/set_null"
+     android:layout_alignLeft="@+id/set_null"
+     android:layout_toRightOf="@+id/edit_text_mnojitel_ch1"
+     android:text="@string/set_mnojitel_ch1"
+     android:textColor="@color/White"     
+     android:textSize="12sp" />  
+   
+   
+   <TextView
+     android:id="@+id/text_mnojitel_ch2"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_below="@+id/set_null"
+     android:layout_toRightOf="@+id/set_mnojitel_ch1"
+     android:layout_marginLeft="7dp"
+     android:layout_marginTop="9dp"
+     android:text="@string/text_mnojitel_ch2"
+     android:textColor="@color/White"
+     android:textSize="12sp" />
+
+ <EditText
+     android:id="@+id/edit_text_mnojitel_ch2"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_below="@+id/set_null"
+     android:layout_toRightOf="@+id/text_mnojitel_ch2"
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="2dp"
+     android:text="@string/edit_text_mnojitel_ch2"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     android:inputType="text"/>
+
+  <Button
+     android:id="@+id/set_mnojitel_ch2"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="5dp"
+     android:layout_marginTop="2dp"
+     android:layout_below="@+id/set_null"
+     android:layout_toRightOf="@+id/edit_text_mnojitel_ch2"
+     android:text="@string/set_mnojitel_ch2"
+     android:textColor="@color/White"     
+     android:textSize="12sp" />    
+   
+   
+   
+   
+   <TextView
+     android:id="@+id/text_reset_null"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_alignTop="@+id/set_null"
+     android:layout_alignLeft="@+id/textViewSettingsip" 
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="10dp"
+     android:text="@string/text_reset_null"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     />
+
+  <Button
+     android:id="@+id/set_null"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="2dp"
+     android:layout_below="@+id/set_ip_adress"     
+     android:layout_alignLeft="@+id/set_ip_adress"     
+     android:text="@string/set_null"
+     android:textColor="@color/White"
+     android:textSize="12sp" /> 
+
+  
+     <TextView
+     android:id="@+id/text_genertor"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_below="@+id/set_mnojitel_ch2" 
+     android:layout_alignLeft="@+id/text_reset_null" 
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="10dp"
+     android:text="@string/text_genertor"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     />
+  
+  
+   <TextView
+     android:id="@+id/text_genertor_type"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_alignTop="@+id/genertor_type_off"
+     android:layout_alignLeft="@+id/text_reset_null" 
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="10dp"
+     android:text="@string/text_genertor_type"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     />
+
+
+       
+  <Button
+     android:id="@+id/genertor_type_off"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="30dp"
+     android:layout_below="@+id/set_mnojitel_ch2"     
+     android:layout_toRightOf="@+id/text_genertor_type"    
+     android:text="@string/genertor_type_off"
+     android:textColor="@color/White"
+     android:textSize="12sp" />   
+  
+  <Button
+     android:id="@+id/genertor_type_Sinus"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignTop="@+id/genertor_type_off"    
+     android:layout_toRightOf="@+id/genertor_type_off"    
+     android:text="@string/genertor_type_Sinus"
+     android:textColor="@color/White"
+     android:textSize="12sp" />  
+     
+  <Button
+     android:id="@+id/genertor_type_Meander"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignTop="@+id/genertor_type_off"     
+     android:layout_toRightOf="@+id/genertor_type_Sinus"      
+     android:text="@string/genertor_type_Meander"
+     android:textColor="@color/White"
+     android:textSize="12sp" /> 
+       
+  <Button
+     android:id="@+id/genertor_type_Triagle"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignTop="@+id/genertor_type_off"     
+     android:layout_toRightOf="@+id/genertor_type_Meander"      
+     android:text="@string/genertor_type_Triagle"
+     android:textColor="@color/White"
+     android:textSize="12sp" />   
+  
+  <Button
+     android:id="@+id/genertor_type_Saw"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignTop="@+id/genertor_type_off"      
+     android:layout_toRightOf="@+id/genertor_type_Triagle"     
+     android:text="@string/genertor_type_Saw"
+     android:textColor="@color/White"
+     android:textSize="12sp" />   
+  
+  <Button
+     android:id="@+id/genertor_type_Digital"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignTop="@+id/genertor_type_off"     
+     android:layout_toRightOf="@+id/genertor_type_Saw"     
+     android:text="@string/genertor_type_Digital"
+     android:textColor="@color/White"
+     android:textSize="12sp" />   
+  
+  
+  
+  <TextView
+     android:id="@+id/text_genertor_freq"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_alignTop="@+id/genertor_freq_100"
+     android:layout_alignLeft="@+id/text_reset_null" 
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="10dp"
+     android:text="@string/text_genertor_freq"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     />
+
+       
+  <Button
+     android:id="@+id/genertor_freq_100"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignLeft="@+id/genertor_type_Sinus"  
+     android:layout_below="@+id/genertor_type_off"  
+     android:text="@string/genertor_freq_100"
+     android:textColor="@color/White"
+     android:textSize="12sp" />   
+  
+  <Button
+     android:id="@+id/genertor_freq_1k"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignTop="@+id/genertor_freq_100"    
+     android:layout_toRightOf="@+id/genertor_freq_100"    
+     android:text="@string/genertor_freq_1k"
+     android:textColor="@color/White"
+     android:textSize="12sp" />  
+     
+  <Button
+     android:id="@+id/genertor_freq_10k"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignTop="@+id/genertor_freq_1k"     
+     android:layout_toRightOf="@+id/genertor_freq_1k"      
+     android:text="@string/genertor_freq_10k"
+     android:textColor="@color/White"
+     android:textSize="12sp" />   
+  
+  
+  <TextView
+     android:id="@+id/text_genertor_Upp"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_alignTop="@+id/genertor_set_Upp"
+     android:layout_alignLeft="@+id/text_reset_null" 
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="10dp"
+     android:text="@string/text_genertor_Upp"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     />
+
+ <EditText
+     android:id="@+id/text_input_Upp"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_alignLeft="@+id/genertor_freq_100"  
+     android:layout_below="@+id/genertor_freq_100"   
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="2dp"
+     android:text="@string/text_input_Upp"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     android:inputType="text"/>
+        
+  <Button
+     android:id="@+id/genertor_set_Upp"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignLeft="@+id/genertor_freq_1k"  
+     android:layout_below="@+id/genertor_freq_1k"  
+     android:text="@string/genertor_set_Upp"
+     android:textColor="@color/White"
+     android:textSize="12sp" />     
+  
+   <SeekBar
+     android:id="@+id/seekBar_genertor_Upp"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"          
+     android:layout_below="@+id/genertor_freq_1k"
+     android:layout_toRightOf="@+id/genertor_set_Upp"
+     android:layout_marginBottom="0dp"
+     android:layout_marginLeft="0dp"
+     android:layout_marginRight="0dp"          
+     android:layout_marginTop="0dp"
+     android:gravity="bottom"        
+     android:layout_alignParentRight="true"
+     android:max="255" />
+  
+  <TextView
+     android:id="@+id/text_type_minmax"
+     android:layout_height="wrap_content"
+     android:layout_width="wrap_content"
+     android:layout_alignTop="@+id/type_minmax"
+     android:layout_alignLeft="@+id/text_reset_null" 
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="10dp"
+     android:text="@string/text_type_minmax"
+     android:textColor="@color/White"
+     android:textSize="12sp"
+     />
+        
+  <Button
+     android:id="@+id/type_minmax"
+     android:layout_width="100dp"
+     android:layout_height="35dp"         
+     android:layout_marginLeft="0dp"
+     android:layout_marginTop="0dp"
+     android:layout_alignLeft="@+id/text_input_Upp"  
+     android:layout_below="@+id/text_input_Upp"  
+     android:text="@string/type_minmax"
+     android:textColor="@color/White"
+     android:textSize="12sp" />    
+</RelativeLayout>

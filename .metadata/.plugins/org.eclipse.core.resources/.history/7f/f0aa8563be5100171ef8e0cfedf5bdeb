@@ -1,0 +1,305 @@
+package com.gold.wurf;
+
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.gold.wurf.TCP_Client.PreferencesManager;
+import com.gold.wurf.TCP_Client.TcpClient;
+// Мои импорты
+// Для чтения двоичного файла
+// Для графических операций
+
+public class FragmentClientActivity extends Fragment implements android.view.View.OnClickListener {
+    private ListView mList;
+    private ArrayList<String> arrayList;
+    private ClientListAdapter mAdapter;
+    private TcpClient mTcpClient;
+
+	// Логгирование внутри IDE
+	private static final String LOG_TAG = "FlankLOGS";
+
+	// Кнопка "Подключиться"
+	Button SendBtn;
+	// TextView с результатами (вычисленный вурф и первичное объяснение)
+	TextView editTextIPPort;
+	// Настройки, которые хранятся в файле. "Хранить ТОП-10" фрагмента настроек
+	SharedPreferences sPref;
+
+	// Шрифтовые переменные
+	public static final String MYFONT = "fonts/Monotype_corsiva.ttf";
+	private static Typeface myfont = null;
+
+	// Создаём объект, который содержит метод setBackgroundImage замены фоновой картинки 
+	// в зависимости от ориентации экрана
+    DynamicOrientationDetection DOD = new DynamicOrientationDetection();
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+	    super.onConfigurationChanged(newConfig);
+	    // Ставим фоновую картинку в зависимости от ориентации экрана
+	    // getClass().getSimpleName() - это "FragmentMain", имя класса
+	    DOD.setBackgroundImage(this.getResources().getConfiguration().orientation, getClass().getSimpleName(), getView());
+    }
+
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	    // Отображаем содержимое фрагмента fragment_main
+	    setRetainInstance(true);
+	    // Получаем вид фрагмента (по умолчанию с вертикальной фоновой картинкой снежинки)
+	    View v = inflater.inflate(R.layout.fragment_main, null);
+	    // Вызываем метод, который проверяет ориентацию экрана и ставит соответствующую фоновую картинку со снежинкой
+	    DOD.setBackgroundImage(this.getResources().getConfiguration().orientation, getClass().getSimpleName(), v);
+		// Это нужно, чтобы отработал метод onPrepareOptionsMenu. Также для этого вызываем getActivity().invalidateOptionsMenu() в OnViewCreated
+		// Обусловлено это тем, что мы хотим менять доступность пунктов меню (см. onPrepareOptionsMenu) из фрагмента, а не из MainActivity, где всё было бы проще
+		setHasOptionsMenu(true);
+	    // Возвращаем вид с нужной фоновой картинкой  
+		return v;
+    }
+
+    // Добавил этот метод, т.к. необходимо работать с меню MainActivity из этого фрагмента
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getActivity().invalidateOptionsMenu();
+    } 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        /*Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);*/
+
+        arrayList = new ArrayList<String>();
+
+        final EditText etMessage = (EditText) getView().findViewById(R.id.etMessage);
+Toast.makeText(getActivity(), etMessage.toString(), Toast.LENGTH_LONG).show();
+        Button send = (Button) getView().findViewById(R.id.SendBtn);
+
+        //relate the listView from java to the one created in xml
+        mList = (ListView) getView().findViewById(R.id.list);
+        mAdapter = new ClientListAdapter(getActivity(), arrayList);
+        mList.setAdapter(mAdapter);
+
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String message = etMessage.getText().toString();
+
+                //add the text in the arrayList
+                arrayList.add("c: " + message);
+
+                //sends the message to the server
+                if (mTcpClient != null) {
+                    mTcpClient.sendMessage(message);
+                }
+
+                //refresh the list
+                mAdapter.notifyDataSetChanged();
+                etMessage.setText("");
+            }
+        });
+/*****************************/
+// Считываем двоичный файл формата .OSC
+//Toast.makeText(this, extStore.toString(), Toast.LENGTH_SHORT).show();
+        // Получаем путь к телефонной флешке
+        File extStore = Environment.getExternalStorageDirectory();
+        //
+        File file = new File(extStore+"/SOSC.OSC");
+        byte[] fileData = new byte[(int) file.length()];
+        DataInputStream dis = null;
+        try {
+            dis = new DataInputStream(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            dis.readFully(fileData);
+            // Сначала конвертируем считанный файл в массив Integer'ов
+            int[] int_array = bytearray2intarray(fileData);
+            // Первые 64 байта (0-63 по счёту с 0) пропускаем, в них лежат настройки
+            Toast.makeText(getActivity(), Integer.toString(int_array[64]), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), Integer.toString(int_array[65]), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), Integer.toString(int_array[66]), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), Integer.toString(int_array[67]), Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), Integer.toString(int_array[68]), Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            dis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+/* Графический блок */
+
+/*****************************/
+    }
+
+    // Метод конвертирует массив byte в массив Integer
+    public int[] bytearray2intarray(byte[] barray)
+    {
+        int[] iarray = new int[barray.length];
+        int i = 0;
+        for (byte b : barray)
+            iarray[i++] = b & 0xff;
+        return iarray;
+    }
+
+    @Override
+	public void onPause() {
+        super.onPause();
+
+        if (mTcpClient != null) {
+            // disconnect
+            mTcpClient.stopClient();
+            mTcpClient = null;
+        }
+
+    }
+
+    /*@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }*/
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if (mTcpClient != null) {
+            // if the client is connected, enable the connect button and disable the disconnect one
+            menu.getItem(1).setEnabled(true);
+            menu.getItem(0).setEnabled(false);
+        } else {
+            // if the client is disconnected, enable the disconnect button and disable the connect one
+            menu.getItem(1).setEnabled(false);
+            menu.getItem(0).setEnabled(true);
+        }
+        super.onPrepareOptionsMenu(menu);
+    }
+
+	// Обработчик пунктов меню (НЕ ActionBar)
+	// return true означает, что клик будет обработан данным фрагментом, return false - что клик будет обработан MainActivity
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+			case 1:
+				// ПОДКЛЮЧИТЬСЯ
+	            String username = PreferencesManager.getInstance().getUserName();
+	            // check if we have the username saved in the preferences, if not, notify the user to write one down
+	            if (username != null) {
+	                // connect to the server
+	                new ConnectTask().execute("");
+	            } else {
+	                Toast.makeText(getActivity(), "Please got to preferences and set a username first!", Toast.LENGTH_LONG).show();
+	            }
+				return true;
+			case 2:
+				// ОТКЛЮЧИТЬСЯ
+	            if (mTcpClient == null) {
+	                return true;
+	            }
+	            // disconnect
+	            mTcpClient.stopClient();
+	            mTcpClient = null;
+	            // clear the data set
+	            arrayList.clear();
+	            // notify the adapter that the data set has changed.
+	            mAdapter.notifyDataSetChanged();
+				return true;
+			case 3:
+				// НАСТРОЙКИ
+	            //startActivity(new Intent(this, PreferencesActivity.class));
+				return false;
+			case 4:
+				// ВЫХОД. Завершаем работу приложения
+				//getActivity().finish();
+				return false;
+			default: return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    public class ConnectTask extends AsyncTask<String, String, TcpClient> {
+
+        @Override
+        protected TcpClient doInBackground(String... message) {
+
+            //we create a TCPClient object and
+            mTcpClient = new TcpClient(new TcpClient.OnMessageReceived() {
+                @Override
+                //here the messageReceived method is implemented
+                public void messageReceived(String message) {
+                    //this method calls the onProgressUpdate
+                    publishProgress(message);
+                }
+            });
+            mTcpClient.run();
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+
+            //in the arrayList we add the messaged received from server
+            arrayList.add(values[0]);
+            // notify the adapter that the data set has changed. This means that new message received
+            // from server was added to the list
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+
+		// Находим кнопку "Рассчитать вурф" и текстовое поле с пояснением результата
+		SendBtn = (Button) getView().findViewById(R.id.SendBtn);
+		SendBtn.setOnClickListener(this);
+		editTextIPPort = (EditText) getView().findViewById(R.id.etMessage);
+		//editTextIPPort.setMovementMethod(new ScrollingMovementMethod());
+		//editTextIPPort.setScrollbarFadingEnabled(false);
+		// Устанавливаем им шрифт Monotype corsiva
+		if (myfont == null)
+		{
+			Typeface Monotype_corsiva = Typeface.createFromAsset(getActivity().getAssets(), MYFONT);
+			editTextIPPort.setTypeface(Monotype_corsiva);
+			SendBtn.setTypeface(Monotype_corsiva);
+		}
+		Log.d(LOG_TAG, "Визуальные элементы найдены");
+	}
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		
+	}
+}

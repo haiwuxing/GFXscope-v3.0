@@ -1,0 +1,202 @@
+package com.gold.wurf;
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import com.gold.wurf.R;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
+import com.jjoe64.graphview.LegendRenderer;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.series.PointsGraphSeries;
+
+import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
+import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Toast;
+
+public class FragmentTop10 extends Fragment {
+	public int[] int_array;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		// Отображаем содержимое фрагмента fragment_top10
+		View view =  inflater.inflate(R.layout.fragment_top10, null);
+		setRetainInstance(true);
+		return view;
+    }
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		// Подгружаем ранее рассчитаные вурфы из файла и выводим на график
+		LoadAndDisplayWurfs();
+	}
+
+	/** Метод подгружает и отображает вурфы, записанные построчно в файл WurfsTop10.DAT
+	 * 
+	 */
+	public void LoadAndDisplayWurfs()
+	  {
+		/*****************************/
+		getActivity().getWindow().setFlags(
+			    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+			    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+
+		// Считываем двоичный файл формата .OSC
+		//Toast.makeText(this, extStore.toString(), Toast.LENGTH_SHORT).show();
+		        // Получаем путь к телефонной флешке
+		        File extStore = Environment.getExternalStorageDirectory();
+		        File OSCfile = new File(extStore+"/SOSC.OSC");
+				if(OSCfile.exists())
+				{
+			        byte[] fileData = new byte[(int) OSCfile.length()];
+			        DataInputStream dis = null;
+			        try {
+			            dis = new DataInputStream(new FileInputStream(OSCfile));
+			        } catch (FileNotFoundException e) {
+			            e.printStackTrace();
+			        }
+			        try {
+			            dis.readFully(fileData);
+			            // Сначала конвертируем считанный файл в массив Integer'ов
+			            int_array = bytearray2intarray(fileData);
+			            // Первые 64 байта (0-63 по счёту с 0) пропускаем, в них лежат настройки
+			            //Toast.makeText(getActivity(), Integer.toString(int_array[64]), Toast.LENGTH_LONG).show();
+
+			        	// Подготовка данных для графика
+	            		int n = 1000, j = 0, i_ch2 = 65;
+	            		DataPoint[] values1 = new DataPoint[n];
+	            		DataPoint[] values2;
+		                for(int i = 64; i <= 640; i++){
+		                	// Канал 1
+		                    //DataPoint Channel1Value = new DataPoint(j, int_array[i]);
+		                    values1[j] = new DataPoint(2, 3);
+		                	// Канал 2
+		                    /*DataPoint Channel2Value = new DataPoint(j, int_array[i_ch2]);
+		                    values2[j] = Channel2Value;
+		                    i_ch2 += 2;*/
+		                    // Общий счётчик
+		                    j++;
+		                }//Toast.makeText(getActivity(), values1.toString(), Toast.LENGTH_LONG).show();
+//////////
+			            GraphView graph = (GraphView) getActivity().findViewById(R.id.OscillPlot);
+			            LineGraphSeries<DataPoint> series1 = new LineGraphSeries<>(getDataPoints(1000, 64));
+			            LineGraphSeries<DataPoint> series2 = new LineGraphSeries<>(getDataPoints(1000, 65));
+			            // [МАСШТАБИРОВАНИЕ]
+			            // set manual X bounds
+			            graph.getViewport().setYAxisBoundsManual(true);
+			            graph.getViewport().setMinY(0);
+			            graph.getViewport().setMaxY(260);
+			            graph.getViewport().setXAxisBoundsManual(true);
+			            graph.getViewport().setMinX(0);
+			            graph.getViewport().setMaxX(260);
+			            // enable scaling and scrolling
+			            graph.getViewport().setScalable(true);
+			            graph.getViewport().setScalableY(true);
+			            // [/МАСШТАБИРОВАНИЕ]
+			            // [Перетягивание (скроллинг)]
+			            graph.getViewport().setScrollable(true); // enables horizontal scrolling
+			            graph.getViewport().setScrollableY(true); // enables vertical scrolling
+			            graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
+			            graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
+			            // [/Перетягивание (скроллинг)]
+			            //
+			            graph.addSeries(series1);
+			            graph.addSeries(series2);
+			            // График будет точечным
+/*			            series1.setShape(PointsGraphSeries.Shape.POINT);
+			            series2.setShape(PointsGraphSeries.Shape.POINT);
+			            // Размер точек (shape'ов)
+			            series1.setSize(3);
+			            series2.setSize(3);*/
+			            // Заголовки и легенда
+			            series1.setTitle("Канал 1");
+			            series2.setTitle("Канал 2");
+			            graph.getLegendRenderer().setVisible(true);
+			            graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.BOTTOM);
+			            graph.getLegendRenderer().setTextColor(Color.WHITE);
+			            // Координаты легенды. Можно просто graph.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.BOTTOM);
+			            graph.getLegendRenderer().setFixedPosition(Resources.getSystem().getDisplayMetrics().widthPixels / 2, Resources.getSystem().getDisplayMetrics().heightPixels / 2 - graph.getLegendRenderer().getWidth());
+			            // Цвет точек
+			            series1.setColor(Color.parseColor("#00FF00"));
+			            series2.setColor(Color.parseColor("#00FFFF"));
+			            // Фон графика
+			            graph.setBackgroundColor(Color.BLACK);
+			            // Заголовок графика
+			            graph.setTitle("Цифровой осциллограф АПП");
+			            graph.setTitleTextSize(30f);
+			            graph.setTitleColor(Color.WHITE);
+			            // Цвет сетки
+			            GridLabelRenderer gridLabelRenderer = graph.getGridLabelRenderer();
+			            gridLabelRenderer.setGridColor(Color.parseColor("#817d7d"));
+			            gridLabelRenderer.reloadStyles();
+			            
+			            Paint paint = new Paint();
+			            paint.setStyle(Paint.Style.STROKE);
+			            paint.setStrokeWidth(10);
+			            paint.setPathEffect(new DashPathEffect(new float[]{8, 5}, 0));
+			            gridLabelRenderer.setGridStyle(paint);
+	//////////
+			        } catch (IOException e) {
+			            e.printStackTrace();
+			        } finally {
+
+			        }
+
+			        try {
+			            dis.close();
+			        } catch (IOException e) {
+			            e.printStackTrace();
+			        }
+
+				}
+				else
+				{	// Файл "SOSC.OSC" не найден? Вызываем соответствующий диалог
+					DialogFragment FileNotExistsDialog = new AlertDialogsFragment();
+					FileNotExistsDialog.show(getFragmentManager(), "WurfsFileNotExistsDialog");
+				}
+	  }
+
+	public DataPoint[] getDataPoints(int n, int startNumber){
+		int j = 0;
+        DataPoint[] values = new DataPoint[(int)n/2];     //creating an object of type DataPoint[] of size 'n'
+        // Формируем данные для графика
+        for(int i = startNumber; i < startNumber + n; i += 2){
+            DataPoint v = new DataPoint(j, int_array[i]);
+            values[j] = v;
+            j++;
+        }
+        return values;
+    }
+
+	/*public DataPoint[] getDataPoints2(int n){
+        DataPoint[] values = new DataPoint[n];     //creating an object of type DataPoint[] of size 'n'
+        for(int i = 65; i < 65 + n; i += 2){
+            DataPoint v = new DataPoint(i - 64, int_array[i]);
+            values[i-65] = v;
+        }
+        return values;
+    }*/
+
+    // Метод конвертирует массив byte в массив Integer
+    public int[] bytearray2intarray(byte[] barray)
+    {
+        int[] iarray = new int[barray.length];
+        int i = 0;
+        for (byte b : barray)
+            iarray[i++] = b & 0xff;
+        return iarray;
+    }
+}
