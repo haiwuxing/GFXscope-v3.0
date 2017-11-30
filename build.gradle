@@ -1,0 +1,172 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.0.1'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenLocal()
+        maven { url "https://maven.google.com" }
+        maven { url 'https://clojars.org/repo/' } // frankiesardo:icepick
+        flatDir {
+            dirs 'advertising_libs'
+        }
+    }
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_COMPILE_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+    dexOptions.preDexLibraries = !project.hasProperty('disablePreDex')
+    flavorDimensions "default"
+
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE"))
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled true // ProGuard remove unused classes
+            shrinkResources true // ProGuard remove unused resources
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt', 'proguard-rules-debug.txt'
+        }
+
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true // ProGuard remove unused classes
+            shrinkResources true // ProGuard remove unused resources
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt', 'proguard-rules-release.txt'
+        }
+    }
+
+    packagingOptions {
+        exclude 'reference/**'
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jni.srcDirs = [] //disable automatic ndk-build call
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+
+        versionCode 2
+        versionName "2.0.0"
+        applicationId "com.gfxscope" //TODO
+    }
+
+    /* TODO
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def versionName, versionCode
+            try {
+                def versionMatcher = variant.versionName =~ /[0-9]+(\.[0-9]+)*/
+    /*
+                versionName = versionMatcher[0][0]
+            } catch (Exception ignored) {
+                versionName = variant.versionName
+            }
+            versionCode = variant.versionCode
+
+            if (variant.buildType.zipAlignEnabled) {
+                def newAlignedName = output.outputFileName
+                def flavorStartDashIndex = newAlignedName.indexOf("-flavor")
+                if (flavorStartDashIndex >= 0) {
+                    def flavorEndIndex = newAlignedName.indexOf("-", flavorStartDashIndex + 1)
+                    if (flavorEndIndex >= 0) {
+                        newAlignedName = newAlignedName.substring(0, flavorStartDashIndex + 1) + newAlignedName.substring(flavorStartDashIndex + "-flavor".length(), flavorEndIndex) + "-v" + versionName + '-' + versionCode + newAlignedName.substring(flavorEndIndex);
+                    }
+                }
+                output.outputFileName = newAlignedName;
+            }
+            logger.info('INFO: Set outputFile to ' + output.outputFile + " for [" + output.name + "]")
+        }
+
+        if (variant.buildType.name == 'release') {
+            variant.assemble.doLast {
+                def versionName, versionCode
+                try {
+                    def versionMatcher = variant.versionName =~ /[0-9]+(\.[0-9]+)*/
+    /*
+                    versionName = versionMatcher[0][0]
+                } catch (Exception ignored) {
+                    versionName = variant.versionName
+                }
+                versionCode = variant.versionCode
+
+                def oldRelativeMappingPath = 'build/outputs/mapping/' + variant.getFlavorName() + '/release/mapping.txt'
+                def newRelativeMappingFolderPath = 'build/outputs/mapping/'
+                def newMappingFileName = 'Name-' + variant.getFlavorName().substring("flavor".length()) + '-v' + versionName + '-' + versionCode +'-mapping.txt'
+
+                println('Copy and rename mapping file from "' + oldRelativeMappingPath + '" to "' + newRelativeMappingFolderPath + newMappingFileName + '"')
+
+                copy {
+                    from (oldRelativeMappingPath) {
+                        rename {newMappingFileName}
+                    }
+                    into newRelativeMappingFolderPath
+                }
+            }
+        }
+
+    }
+    */
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    lintOptions {
+        disable 'MissingTranslation'
+    }
+
+    dexOptions {
+        javaMaxHeapSize "5g"
+    }
+
+    aaptOptions {
+        additionalParameters "--no-version-vectors"
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: '*.jar', dir: 'libs')
+
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:recyclerview-v7:' + project.ANDROID_BUILD_SUPPORT_VER
+    //implementation 'com.android.support:preference-v7:' + project.ANDROID_BUILD_SUPPORT_VER
+    //implementation 'com.android.support:preference-v14:' + project.ANDROID_BUILD_SUPPORT_VER
+    implementation 'com.android.support:design:' + project.ANDROID_BUILD_SUPPORT_VER
+    implementation 'com.google.firebase:firebase-crash:' + project.ANDROID_BUILD_PLAY_FIREBASE_VER
+
+    implementation 'frankiesardo:icepick:' + ANDROID_BUILD_ICEPICK_VER
+    annotationProcessor 'frankiesardo:icepick-processor:' + ANDROID_BUILD_ICEPICK_VER
+
+    implementation project(':android-support-v4-preferencefragment-master') //TODO remove
+
+}
