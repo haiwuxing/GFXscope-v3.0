@@ -82,7 +82,7 @@
     <string name="pause">Play</string> 
     <string name="CHauto">auto</string> 
     <string name="sync_type">front</string> 
-    <string name="menu">Настройки</string> 
+    <string name="settings">Настройки</string>
     <string name="back">Назад</string>     
     <string name="text_reset_null">Калибровка нуля</string>  
     <string name="set_null">Выполнить</string> 

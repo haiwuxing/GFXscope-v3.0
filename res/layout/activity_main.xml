@@ -1,11 +1,6 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:id="@+id/FragmentContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        xmlns:tools="http://schemas.android.com/tools" 
-        tools:context=".MainActivity">
-
-<!-- Сюда будем загружать фрагменты - окошки "Домой" (главная страница), "ТОП-10", "Настройки" и "О вурфе" -->
-
-</FrameLayout>
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/FragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

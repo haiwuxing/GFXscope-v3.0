@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,14 +24,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,124 +43,123 @@ import android.widget.Toast;
 import com.TCP_Client.TCPListener;
 //import com.TCP_Client.TcpClient;
 import com.TCP_Client.TCPCommunicator;
-import com.gfxscope.R;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.utils.Utils;
 import android.widget.VerticalSeekBar;
 
+public class FragmentMain extends Fragment implements TCPListener{
+    public static final @NonNull String TAG = Utils.getTag(FragmentMain.class);
 
-@SuppressLint({ "ResourceAsColor", "NewApi" }) public class FragmentMain extends Fragment implements TCPListener{
+    private static GraphView graph;
+    private static Runnable mTimerScrollLeft;
+    private static Runnable mTimerScrollRighr;
+    private static Runnable mTimerRefreshRMS;
+    private static Runnable mTimerDont_read_settings;
+    private static Runnable mTimerGrafik_refresh;
+    private static Runnable mTimerSettings_refresh;
+    private static Runnable mTimerBitrate_refresh;
+    private static Runnable mTimer_scrBt;
+    private final static Handler mHandler = new Handler();
+    
+    private static int pause=1;
+    private LineGraphSeries<DataPoint> series1;
+    private LineGraphSeries<DataPoint> series2;
+    private LineGraphSeries<DataPoint> series3;
+    
+    
+    
+    private int dont_use_bufpoz=0;
+    private byte count_CH1_freq=1;
+    private byte count_CH2_freq=1;
+    private int CH1_freq;
+    private int CH1_freq_temp;
+    private int CH2_freq;
+    private int CH2_freq_temp;
+    private byte CH1_duty_cycl;
+    private byte CH2_duty_cycl;
+    private int CH1_duty_cycl_temp;
+    private int CH2_duty_cycl_temp;
+    private byte count_CH1_duty_cycl=1;
+    private byte count_CH2_duty_cycl=1;
+    private byte minmax = 0;
+    private int temp_rxCount=0;
+    private static int bufpoz;
+    private static int Xpoz_for_RMS;
+    private static int Xpoz;
+    private int Xpoz_old = 1;
+    private int bufpoz_old;
+    private double U1;
+    private double U2;
+    private final int     adres_KOL_KLETOK_T=6;
+    private final int     adres_ADC_freqH=7;
+    private final int     adres_ADC_freqL=8;
+    //private final int     adres_ADC_max_freqH=9;
+    //private final int     adres_ADC_max_freqL=10;
+    private final int     adres_screeen_osc_piksels=11;	
+    private final int     adres_ADC_Interleaved_mode=12;	
+    private final int     adres_CH1_n_delitel=13	;
+    private final int     adres_CH2_n_delitel=14;
+    private final int     adres_CH1_dc_ac=15	;
+    private final int     adres_CH2_dc_ac=16	;
+    private final int     adres_Usinhros=17	;	
+    private final int     adres_Usinhros_for_CH=18;	
+    private final int     adres_Usinhros_type=19	;
+    private final int     adres_Uoffset_Chanal1=20;	
+    private final int     adres_Uoffset_Chanal2=21;			
+    private final int     adres_scale_t=22;		
+    private final int     adres_scale_x=23	;		
+    private final int     adres_auto_time=24	;
+    private final int     adres_auto_sinhros=25;	
+    private final int     adres_auto_CH1_Udel=26;		
+    private final int     adres_auto_CH2_Udel=27	;		        	
+    private final int     adres_CH1_correctH=28;		
+    private final int     adres_CH1_correctL=29;						
+    private final int     adres_CH2_correctH=30;		
+    private final int     adres_CH2_correctL=31;	
+    private final int     TRACK_BAR_COEFF = 1000;
+    //public static int     rxCount_vivod;
+    private int count_bar;
 
-private static GraphView graph;
-private static Runnable mTimerScrollLeft;
-private static Runnable mTimerScrollRighr;
-private static Runnable mTimerRefreshRMS;
-private static Runnable mTimerDont_read_settings;
-private static Runnable mTimerGrafik_refresh;
-private static Runnable mTimerSettings_refresh;
-private static Runnable mTimerBitrate_refresh;
-private static Runnable mTimer_scrBt;
-private final static Handler mHandler = new Handler();
-
-private static int pause=1;
-private LineGraphSeries<DataPoint> series1;
-private LineGraphSeries<DataPoint> series2;
-private LineGraphSeries<DataPoint> series3;
-
-
-
-private int dont_use_bufpoz=0;
-private byte count_CH1_freq=1;
-private byte count_CH2_freq=1;
-private int CH1_freq;
-private int CH1_freq_temp;
-private int CH2_freq;
-private int CH2_freq_temp;
-private byte CH1_duty_cycl;
-private byte CH2_duty_cycl;
-private int CH1_duty_cycl_temp;
-private int CH2_duty_cycl_temp;
-private byte count_CH1_duty_cycl=1;
-private byte count_CH2_duty_cycl=1;
-private byte minmax = 0;
-private int temp_rxCount=0;
-private static int bufpoz;
-private static int Xpoz_for_RMS;
-private static int Xpoz;
-private int Xpoz_old = 1;
-private int bufpoz_old;
-private double U1;
-private double U2;
-private final int     adres_KOL_KLETOK_T=6;
-private final int     adres_ADC_freqH=7;
-private final int     adres_ADC_freqL=8;
-//private final int     adres_ADC_max_freqH=9;
-//private final int     adres_ADC_max_freqL=10;
-private final int     adres_screeen_osc_piksels=11;	
-private final int     adres_ADC_Interleaved_mode=12;	
-private final int     adres_CH1_n_delitel=13	;
-private final int     adres_CH2_n_delitel=14;
-private final int     adres_CH1_dc_ac=15	;
-private final int     adres_CH2_dc_ac=16	;
-private final int     adres_Usinhros=17	;	
-private final int     adres_Usinhros_for_CH=18;	
-private final int     adres_Usinhros_type=19	;
-private final int     adres_Uoffset_Chanal1=20;	
-private final int     adres_Uoffset_Chanal2=21;			
-private final int     adres_scale_t=22;		
-private final int     adres_scale_x=23	;		
-private final int     adres_auto_time=24	;
-private final int     adres_auto_sinhros=25;	
-private final int     adres_auto_CH1_Udel=26;		
-private final int     adres_auto_CH2_Udel=27	;		        	
-private final int     adres_CH1_correctH=28;		
-private final int     adres_CH1_correctL=29;						
-private final int     adres_CH2_correctH=30;		
-private final int     adres_CH2_correctL=31;	
-private final int     TRACK_BAR_COEFF = 1000;
-//public static int     rxCount_vivod;
-private int count_bar;
-
- private VerticalSeekBar verticalSeekBar_usync=null;
- private TextView textView_CH1avr = null;
- private TextView textView_CH1rms = null;		
- private TextView textView_CH1pp = null;		
- private TextView textView_CH1freq = null;
- private TextView textView_CH1dutyc = null;		
- private TextView textView_CH2avr = null;
- private TextView textView_CH2rms = null;		
- private TextView textView_CH2pp = null;		
- private TextView textView_CH2freq = null;
- private TextView textView_CH2dutyc = null;
- private TextView text_bitrate = null;
- private static SeekBar seekBar = null;
- private static com.jjoe64.graphview.GraphView grafik= null; 
- private static Button screen_bt_pause = null; 
- private static Button screen_bt_plus = null;
- private static Button screen_bt_minus = null; 
- private static Button screen_bt_free = null; 
- private static Button screen_bt_ch1plus = null;
- private static Button screen_bt_ch1minus = null;  
- private static Button screen_bt_ch2plus = null;
- private static Button screen_bt_ch2minus = null; 
- private static Button screen_bt_Tplus = null;
- private static Button screen_bt_Tminus = null;  
- private int view_scrbt=0;
- private int first_load=0; 
- private static Button send = null;
- private Button CH1_ACDC = null;
- private Button CH2_ACDC = null;			
- private Button t_auto = null; 
- private Button sync_type = null;
- private Button sync_auto = null;
- private Button ch1_auto = null;
- private Button ch2_auto = null;
- private Button ExitBtn = null;
- private Button MenuBtn = null;
- private Button SaveBtn = null;
- private Button OpenBtn = null;
+    private VerticalSeekBar verticalSeekBar_usync=null;
+    private TextView textView_CH1avr = null;
+    private TextView textView_CH1rms = null;
+    private TextView textView_CH1pp = null;
+    private TextView textView_CH1freq = null;
+    private TextView textView_CH1dutyc = null;
+    private TextView textView_CH2avr = null;
+    private TextView textView_CH2rms = null;
+    private TextView textView_CH2pp = null;
+    private TextView textView_CH2freq = null;
+    private TextView textView_CH2dutyc = null;
+    private TextView text_bitrate = null;
+    private static SeekBar seekBar = null;
+    private static com.jjoe64.graphview.GraphView grafik= null;
+    private static Button screen_bt_pause = null;
+    private static Button screen_bt_plus = null;
+    private static Button screen_bt_minus = null;
+    private static Button screen_bt_free = null;
+    private static Button screen_bt_ch1plus = null;
+    private static Button screen_bt_ch1minus = null;
+    private static Button screen_bt_ch2plus = null;
+    private static Button screen_bt_ch2minus = null;
+    private static Button screen_bt_Tplus = null;
+    private static Button screen_bt_Tminus = null;
+    private int view_scrbt=0;
+    private int first_load=0;
+    private static Button send = null;
+    private Button CH1_ACDC = null;
+    private Button CH2_ACDC = null;
+    private Button t_auto = null;
+    private Button sync_type = null;
+    private Button sync_auto = null;
+    private Button ch1_auto = null;
+    private Button ch2_auto = null;
+    private Button MenuBtn = null;
+    private Button SaveBtn = null;
+    private Button OpenBtn = null;
  
 //    private  boolean CH1_viev_RMS=false, CH2_viev_RMS=false; 
     private static int rxCount;
@@ -188,18 +186,19 @@ private int count_bar;
     
 //    private int n_line = 0, X1, X2;
     private enum TUsinhros_type {
-     FRONT,
-     FALL,
-     FRONT_WAIT,
-     FALL_WAIT,
-     OFF,     
-    };
+        FRONT,
+        FALL,
+        FRONT_WAIT,
+        FALL_WAIT,
+        OFF,
+    }
+
     private static TUsinhros_type Usinhros_type=TUsinhros_type.FRONT;
-    private enum Tgrafic_type
-    {
+    private enum Tgrafic_type {
         AVERAGE,
         MINMAX
-    };
+    }
+
     private static Tgrafic_type grafic_type = Tgrafic_type.AVERAGE;
     private int AlternativVoltDiapason;
     private static int KOL_KLETOK_T = 17;
@@ -286,8 +285,6 @@ private int count_bar;
     private static int auto_sinhros;
     private static int auto_CH1_Udel;
     private static int auto_CH2_Udel;
-//    private int manual_nachalo_buffer1;
-//    private int manual_nachalo_buffer2;
     private static byte disable_set_comands = 0;
     static float CH1_correct=1;
     static float CH2_correct=1;
@@ -295,10 +292,7 @@ private int count_bar;
     private static int settings_read_ok;
     private static int max_scale_t=32;
     
-    //private static TcpClient mTcpClient;
 	public static TCPCommunicator tcpClient;
-	//private ProgressDialog dialog;
-	public static String currentUserName;
 	private static Handler UIHandler = new Handler();
     
     static final String PREF_IPadress = "IPadress";
@@ -306,288 +300,53 @@ private int count_bar;
     static SharedPreferences settings;
     static SharedPreferences settings2;
 	public static Editor prefEditor;
-    //private SharedPreferences.Editor prefEditor;
-	// Логгирование внутри IDE
+
 	private static final String LOG_TAG = "FlankLOGS";
 	private int error_bitrate=0;
-    float historicX = Float.NaN, historicY = Float.NaN;
+
     static final int DELTA = 50;
 	protected static final int INVALID_POINTER_ID = 0;
-    enum Direction {LEFT, RIGHT;}
-    
+
     private float mLastTouchX; 
-    private float mLastTouchY; 
-    //private float mPosX ;
-    //private float mPosY ;
+    private float mLastTouchY;
     private  int tfree;
     
     DataPoint[] ch1_values = new DataPoint[(int)(Xmax)];
     DataPoint[] ch2_values = new DataPoint[(int)(Xmax)];
         
     
-    static int get_grafic_type(  ) {
-    	if (grafic_type == Tgrafic_type.AVERAGE) return 0;
-    	else return 1;
+    static int get_grafic_type() {
+    	return grafic_type == Tgrafic_type.AVERAGE ? 0 : 1;
     }    
     
-    static void set_grafic_type( int type ) {
-    	if (type==0)grafic_type = Tgrafic_type.AVERAGE;
-    	else grafic_type = Tgrafic_type.MINMAX;
+    static void set_grafic_type(int type) {
+    	grafic_type = type == 0 ? Tgrafic_type.AVERAGE : Tgrafic_type.MINMAX;
     }
-	//======================================================================================================	
-	private String CurrentFragmentTag = "fragment_main";
-  	// Метод выводит переданный в параметрах фрагмент
-	private void LoadFragment(Fragment NewFragment, String NewFragmentTag) {
-  	    FragmentManager fm = getFragmentManager();
-  	    Fragment currFragment  =  fm.findFragmentByTag(CurrentFragmentTag);
-  	    Fragment newFragment   =  fm.findFragmentByTag(NewFragmentTag);
-  	    FragmentTransaction ft =  fm.beginTransaction();
-  	    if (currFragment != null) {
-  	        ft.hide(currFragment);
-  	    }
 
-  	    if (newFragment == null) {
-  	    	// Создаём фрагменты впервые (затем будем просто показывать/прятать нужный фрагмент)
-  	    	if (NewFragmentTag.equals(getString(R.string.fragment_main)))  	  {
-  	    	    newFragment  = new FragmentMain();
-  	    	} else if (NewFragmentTag.equals(getString(R.string.fragment_settings))) {
-  	    	    newFragment  = new FragmentSettings();
-  	    	}
-  	    	// Добавляем фрагмент в менеджер транзакций
-  	        ft.add(R.id.FragmentContainer, newFragment, NewFragmentTag);
-  	    } else {
-  		    // Остальные фрагменты статичные, просто прячем текущий и показываем нужный
-  		    // Проверка для начального запуска, когда NewFragmentTag == CurrentFragmentTag == "fragment_main"
-  		    if (NewFragmentTag != CurrentFragmentTag)
-  		    {
-  			    ft.show(newFragment);
-  		    }
-  	    }
-  	    ft.commit();
-  	} 	
-  
-  //======================================================================================================	 
- @Override
- public void onPrepareOptionsMenu(Menu menu) {
-//     if (mTcpClient != null) {
-//         // if the client is connected, enable the connect button and disable the disconnect one
-//         menu.getItem(1).setEnabled(true);
-//         menu.getItem(0).setEnabled(false);
-//     } else {
-//         // if the client is disconnected, enable the disconnect button and disable the connect one
-//         menu.getItem(1).setEnabled(false);
-//         menu.getItem(0).setEnabled(true);
-//     }
-     super.onPrepareOptionsMenu(menu);
- }
-//======================================================================================================	
-// Обработчик пунктов меню (НЕ ActionBar)
-// return true означает, что клик будет обработан данным фрагментом, return false - что клик будет обработан MainActivity
- @Override
- public boolean onOptionsItemSelected(MenuItem item) {
-     // Handle item selection
-     switch (item.getItemId()) {
-		case 1:
-//			// ПОДКЛЮЧИТЬСЯ	            
-//             new ConnectTask().execute("");
-//Log.d(LOG_TAG, "ПОДКЛЮЧИТЬСЯ");
-			return true;
-		case 2:
-//			// ОТКЛЮЧИТЬСЯ
-//            if (mTcpClient == null) {
-//                return true;
-//            }
-//            // disconnect
-//            mTcpClient.stopClient();
-//            mTcpClient = null;
-//Log.d(LOG_TAG, "ОТКЛЮЧИТЬСЯ");
-			return true;
-			case 3:
-				// Открыть файл
-				setRetainInstance(true);		
-				  Intent intent = new Intent()
-			        .setType("*/*")
-			        .setAction(Intent.ACTION_GET_CONTENT);
-			        startActivityForResult(Intent.createChooser(intent, "Select a file"), 123);	
-				return true;	
-			case 4:
-				// Сохранить файл
-				// (1) get today's date
-			    Date today = Calendar.getInstance().getTime();
-			    // (2) create a date "formatter" (the date format we want)
-			    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
-			    // (3) create a new String using the date format we want
-			    String Name = formatter.format(today); 				
-				//Toast.makeText(getActivity(),"save to " + extStore+dateTime+".OSC", Toast.LENGTH_LONG).show();
-				SaveWurfs(Name+".OSC");				
-				return true;		
-			case 5:
-				// НАСТРОЙКИ
-				return false;
-			case 6:
-				// Скрин
-				return false;				
-			case 7:
-				// ВЫХОД. Завершаем работу приложения
-				return false;
-			default: return super.onOptionsItemSelected(item);
-     }
- }
- 
- 
-	@Override   
-    public void onTCPMessageRecieved( byte[] bs) {
-		
-//		Runnable runnable = new Runnable() {
-//			
-//			@Override
-//			public void run() {
-//				// TODO Auto-generated method stub
-//				try
-//				{
-		
-                for (int i=0; i<bs.length; i++){  
-                	
-//               	  if (rxCount<ADC_Buff.length){
-//        			  if (rxIn>=ADC_Buff.length)rxIn=0;
-//        			  ADC_Buff[rxIn]=bs[i];	
-//                      rxIn++;
-//                      rxCount++;	                	
-//                   }
-//               	    else while  (rxCount>=ADC_Buff.length);
-//                }
-                	
-                    if (rxCount<ADC_Buff.length) 	{
-                        	ADC_Buff[rxCount]=bs[i];
-                            rxCount++;
-                    }
-                    else {
-                    	while (dont_use_bufpoz==1);
-                        rxCount=0;
-                        //Xpoz=0;                        
-                        bufpoz=0;
-                        }
-                    } 
-                
-                
-//				}
-//				catch(Exception e)
-//				{
-//
-//				}
-//			}
-//			
-//		};
-//		Thread thread = new Thread(runnable);
-//		thread.start();
-		
-	
-		
-		//getActivity().runOnUiThread(new Runnable() {
-        //    @Override
-        //    public void run() {
-              
-         //   }
-       // });
-		
+	@Override
+    @WorkerThread
+    public void onTCPMessageRecieved(byte[] bs) {
+        for (final byte b : bs) {
+            if (rxCount < ADC_Buff.length) {
+                ADC_Buff[rxCount] = b;
+                rxCount++;
+            } else {
+                //noinspection StatementWithEmptyBody
+                while (dont_use_bufpoz == 1) {
+                    // empty
+                }
 
-     	
-     }
- 	
- 	
-//	@Override
-//	public void onTCPMessageRecieved(String message) {
-//		// TODO Auto-generated method stub
-//		final String theMessage=message;
-//		try {
-//			JSONObject obj = new JSONObject(message);
-//			String messageTypeString=obj.getString(EnumsAndStatics.MESSAGE_TYPE_FOR_JSON);
-//			MessageTypes messageType = EnumsAndStatics.getMessageTypeByString(messageTypeString);
-//			
-//			switch(messageType)
-//			{
-//
-//				case MessageFromServer:
-//				{
-//					
-//					runOnUiThread(new Runnable() {
-//						
-//						@Override
-//						public void run() {
-//							// TODO Auto-generated method stub
-//							EditText editTextFromServer =(EditText)findViewById(R.id.editTextFromServer);
-//							editTextFromServer.setText(theMessage);
-//						}
-//					});
-//				
-//			    	break;
-//				}
-//				 
-//				
-//			}
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
-//	}
+                rxCount = 0;
+                bufpoz = 0;
+            }
+        }
+    }
 
 	@Override
 	public void onTCPConnectionStatusChanged(boolean isConnectedNow) {
-		// TODO Auto-generated method stub
-		if(isConnectedNow)
-		{
-			Connecting=1;
-//			Activity.runOnUiThread(new Runnable() {
-//			
-//				@Override
-//				public void run() {
-//					// TODO Auto-generated method stub
-//					//dialog.hide();
-//					Toast.makeText(getActivity(), "Connected to server", Toast.LENGTH_SHORT).show();
-//				}
-//			});
-			
-		}
-		else Connecting=0;
+        Connecting = isConnectedNow ? 1 : 0;
 	}
 
-
-//======================================================================================================	
-// public class ConnectTask extends AsyncTask<String, String, TcpClient> {
-//     @Override
-//     protected TcpClient doInBackground(String... message) {
-//         Log.d(LOG_TAG, "doInBackground 1");
-//         mTcpClient = new TcpClient(new TcpClient.OnMessageReceived() {
-//             @Override
-//             //here the messageReceived method is implemented
-//             public void messageReceived(byte[] bs) {
-//             	for (int i=0; i<bs.length; i++){                    		
-//            		if (FragmentMain.rxCount<FragmentMain.ADC_Buff.length) 	{
-//            			FragmentMain.ADC_Buff[FragmentMain.rxCount]=bs[i];
-//            			FragmentMain.rxCount++;
-//            			}
-//            		else {
-//            			FragmentMain.rxCount=0;
-//            			FragmentMain.Xpoz=0;
-//            			FragmentMain.bufpoz=0;
-//            			//FragmentMain.rxCount_vivod=0;
-//            		}
-//            	}
-//             }
-//
-//			@Override
-//			public void messageReceived(String message) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//         });
-//         mTcpClient.run();
-//         Log.d(LOG_TAG, "doInBackground 2");
-//         return null;
-//     }
-// } 
- //======================================================================================================	
 	public void SaveWurfs(String path)
 	{
 		        File extStore = Environment.getExternalStorageDirectory();
@@ -1250,8 +1009,7 @@ return;
       sync_auto = (Button) getView().findViewById(R.id.Sync_auto);
       ch1_auto = (Button) getView().findViewById(R.id.CH1_auto);
       ch2_auto = (Button) getView().findViewById(R.id.CH2_auto);
-      ExitBtn = (Button) getView().findViewById(R.id.ExitBtn);
-      MenuBtn = (Button) getView().findViewById(R.id.MenuBtn);
+      MenuBtn = (Button) getView().findViewById(R.id.settingsBtn);
       SaveBtn = (Button) getView().findViewById(R.id.SaveBtn);
       OpenBtn = (Button) getView().findViewById(R.id.OpenBtn);
       grafik= (com.jjoe64.graphview.GraphView)  getView().findViewById(R.id.OscillPlot);          
@@ -1588,77 +1346,15 @@ return;
     	  }
       });   
 
-//      @Override
-//      public boolean onTouch(View view, MotionEvent event) {
-//        // событие
-//        int actionMask = event.getActionMasked();
-//        // индекс касания
-//        int pointerIndex = event.getActionIndex();
-//        // число касаний
-//        int pointerCount = event.getPointerCount();
-//     
-//        switch (actionMask) {
-//        case MotionEvent.ACTION_DOWN: // первое касание
-//          inTouch = true;
-//        case MotionEvent.ACTION_POINTER_DOWN: // последующие касания
-//          downPI = pointerIndex;
-//          break;
-//     
-//        case MotionEvent.ACTION_UP: // прерывание последнего касания
-//          inTouch = false;
-//          sb.setLength(0);
-//        case MotionEvent.ACTION_POINTER_UP: // прерывания касаний
-//          upPI = pointerIndex;
-//          break;
-//     
-//        case MotionEvent.ACTION_MOVE: // движение
-//          sb.setLength(0);
-//     
-//          for (int i = 0; i < 10; i++) {
-//            sb.append("Index = " + i);
-//            if (i < pointerCount) {
-//              sb.append(", ID = " + event.getPointerId(i));
-//              sb.append(", X = " + event.getX(i));
-//              sb.append(", Y = " + event.getY(i));
-//            } else {
-//              sb.append(", ID = ");
-//              sb.append(", X = ");
-//              sb.append(", Y = ");
-//            }
-//            sb.append("\r\n");
-//          }
-//          break;
-//        }
-//        result = "down: " + downPI + "\n" + "up: " + upPI + "\n";
-//     
-//        if (inTouch) {
-//          result += "pointerCount = " + pointerCount + "\n" + sb.toString();
-//        }
-//        tv.setText(result);
-//        return true;
-//      }
-//    }
-
-      ExitBtn.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {                       
-        	  osc_set_param("POWER_OFF 1");
-              long t1=Calendar.getInstance().getTimeInMillis();
-              long t2=Calendar.getInstance().getTimeInMillis();
-              while((t2-t1)<500) {
-            	  t2=Calendar.getInstance().getTimeInMillis();
-            	    		  
-            	  }
-              //view.finish();
-              android.os.Process.killProcess(android.os.Process.myPid());
-              //view.finishAffinity();
-          }
-      });  
-      
       MenuBtn.setOnClickListener(new View.OnClickListener() {
           @Override
-          public void onClick(View view) {                       
-        	  LoadFragment(MainActivity.frag_settings, getString(R.string.fragment_settings));
+          public void onClick(View view) {
+              final Activity activity = getActivity();
+              if (Utils.isDead(activity) || !(activity instanceof MainActivity)) {
+                  return;
+              }
+
+              ((MainActivity) activity).showSettings();
           }
       });       
         

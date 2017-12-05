@@ -188,27 +188,15 @@
         android:textColor="@color/White"
         android:textSize="20sp"
         android:visibility="invisible" />
-    
-    <Button
-        android:id="@+id/ExitBtn"
-        android:layout_width="85dp"
-        android:layout_height="@dimen/button2_height"
-        android:layout_marginLeft="-5dp"
-        android:layout_marginTop="0dp"
-        android:layout_toRightOf="@+id/seekBar_usync"
-        android:text="@string/exit"
-        android:textColor="@color/White"
-        android:textSize="12sp" />
 
     <Button
-        android:id="@+id/MenuBtn"
+        android:id="@+id/settingsBtn"
         android:layout_width="85dp"
         android:layout_height="@dimen/button2_height"
-        android:layout_below="@+id/ExitBtn"
         android:layout_marginLeft="-5dp"
         android:layout_marginTop="0dp"
         android:layout_toRightOf="@+id/seekBar_usync"
-        android:text="@string/menu"
+        android:text="@string/settings"
         android:textColor="@color/White"
         android:textSize="12sp" />
 
@@ -228,7 +216,7 @@
         android:id="@+id/OpenBtn"
         android:layout_width="85dp"
         android:layout_height="@dimen/button2_height"
-        android:layout_below="@+id/MenuBtn"
+        android:layout_below="@+id/settingsBtn"
         android:layout_marginLeft="-5dp"
         android:layout_marginTop="0dp"
         android:layout_toRightOf="@+id/seekBar_usync"
