@@ -124,6 +124,11 @@
     <string name="t_free">Free</string>    
      
     <string name="text_type_minmax">Тип усреднения</string>     
-    <string name="type_minmax">Среднее</string>    
-    
+    <string name="type_minmax">Среднее</string>
+
+    <string-array name="tgrafic_type">
+        <item>Среднее</item>
+        <item>MIN-MAX</item>
+    </string-array>
+
 </resources>

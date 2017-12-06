@@ -24,9 +24,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.annotation.WorkerThread;
 import android.support.v4.app.Fragment;
+import android.support.v4.os.ParcelableCompat;
+import android.support.v4.os.ParcelableCompatCreatorCallbacks;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,6 +53,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.models.TGraficType;
 import com.utils.Utils;
 import android.widget.VerticalSeekBar;
 
@@ -194,12 +201,8 @@ public class FragmentMain extends Fragment implements TCPListener{
     }
 
     private static TUsinhros_type Usinhros_type=TUsinhros_type.FRONT;
-    private enum Tgrafic_type {
-        AVERAGE,
-        MINMAX
-    }
 
-    private static Tgrafic_type grafic_type = Tgrafic_type.AVERAGE;
+    private static TGraficType grafic_type = TGraficType.AVERAGE;
     private int AlternativVoltDiapason;
     private static int KOL_KLETOK_T = 17;
     private static int KOL_KLETOK_T_old = 17;
@@ -315,12 +318,12 @@ public class FragmentMain extends Fragment implements TCPListener{
     DataPoint[] ch2_values = new DataPoint[(int)(Xmax)];
         
     
-    static int get_grafic_type() {
-    	return grafic_type == Tgrafic_type.AVERAGE ? 0 : 1;
+    static @NonNull TGraficType get_grafic_type() {
+    	return grafic_type;
     }    
     
     static void set_grafic_type(int type) {
-    	grafic_type = type == 0 ? Tgrafic_type.AVERAGE : Tgrafic_type.MINMAX;
+    	grafic_type = type == 0 ? TGraficType.AVERAGE : TGraficType.MINMAX;
     }
 
 	@Override
@@ -2264,212 +2267,201 @@ return;
        //================================================================================================  	
         if ((bufpoz + (2 + SIZE_BUF_SETTINGS)) < (ADC_Buff.length ) 
         		&& (bufpoz >= SIZE_BUF_SETTINGS) 
-        		&& (bufpoz + (2 + SIZE_BUF_SETTINGS) < rxCount ) )
-        {
+        		&& (bufpoz + (2 + SIZE_BUF_SETTINGS) < rxCount ) ) {
 
 
-       //================================================================================================
-       //================================================================================================            
-       if (avr == true)
-       {            
-	      	   
-                int cound_temp = 0;                
+            //================================================================================================
+            //================================================================================================
+            if (avr) {
+                int cound_temp = 0;
                 U1 = 0;
                 U2 = 0;
                 double u1temp = 0;
                 double u2temp = 0;
-                long Uadc1 = 0;              
-                long Uadc2 = 0;
-                
-                    if ((minmax == 1)||(grafic_type == Tgrafic_type.AVERAGE))
-                    {
-                        Uadc1 = 0;
-                        Uadc2 = 0;
-                    }
-                    else
-                    {
-                        Uadc1 = 255;
-                        Uadc2 = 255;
-                    }
-                                        
-                for (int j = 0; j < scale_t; j ++)
-                {
-                    if (((byte)ADC_Buff[bufpoz] == (byte)'o') &&
-                        ((byte)ADC_Buff[bufpoz + 1] == (byte)'s') &&
-                        ((byte)ADC_Buff[bufpoz + 2] == (byte)'c') &&
-                        ((byte)ADC_Buff[bufpoz + 3] == (byte)' ') &&
-                        ((byte)ADC_Buff[bufpoz + 4] == (byte)'v') &&
-                        ((byte)ADC_Buff[bufpoz + 5] == (byte)'3'))
-                    {
+
+                long Uadc1, Uadc2;
+                Uadc1 = Uadc2 = (minmax == 1) || (grafic_type == TGraficType.AVERAGE) ? 0 : 255;
+
+                for (int j = 0; j < scale_t; j ++) {
+                    if ((ADC_Buff[bufpoz] == (byte)'o') &&
+                    (ADC_Buff[bufpoz + 1] == (byte)'s') &&
+                    (ADC_Buff[bufpoz + 2] == (byte)'c') &&
+                    (ADC_Buff[bufpoz + 3] == (byte)' ') &&
+                    (ADC_Buff[bufpoz + 4] == (byte)'v') &&
+                    (ADC_Buff[bufpoz + 5] == (byte)'3')) {
                     	bufpoz = bufpoz + SIZE_BUF_SETTINGS;
                     	readSettings(bufpoz);                    	
                     }                    
                     
-                    V1 = (int)( ADC_Buff[bufpoz] &0xFF) ;      //прочитать из него символ    
-                    V2 = (int)( ADC_Buff[bufpoz+1]&0xFF);      //прочитать из него символ 
+                    V1 = ADC_Buff[bufpoz] & 0xFF;      //прочитать из него символ
+                    V2 = ADC_Buff[bufpoz+1]& 0xFF;      //прочитать из него символ
                     
                     cound_temp++;
-                    if (grafic_type == Tgrafic_type.AVERAGE)
-                    {
+                    if (grafic_type == TGraficType.AVERAGE) {
                         Uadc1 += V1;
                         Uadc2 += V2;
-                    }
-                    else
-                    {
-                        if (minmax == 1)
-                        {
+                    } else {
+                        if (minmax == 1) {
                             if (Uadc1 < V1) Uadc1 = V1;
                             if (Uadc2 < V2) Uadc2 = V2;
-                        }
-                        else
-                        {
+                        } else {
                             if (Uadc1 > V1) Uadc1 = V1;
                             if (Uadc2 > V2) Uadc2 = V2;
                         }
                     }
-                    if (bufpoz < (ADC_Buff.length - ( 6 ))) bufpoz = bufpoz + 2;
-                    else break;
-                }
-                
-                if (minmax == 0) minmax = 1;
-                else minmax = 0;
-
-                if (grafic_type == Tgrafic_type.AVERAGE)
-                {
-                    if (delitel==true) u1temp = CH1_delitel * (((double)Uadc1 / cound_temp) - ADC9288_pol_diapasona);
-                    else               u1temp =  (((double)Uadc1 / cound_temp) - ADC9288_pol_diapasona);
-                    if (delitel==true) u2temp = CH2_delitel * (((double)Uadc2 / cound_temp) - ADC9288_pol_diapasona);
-                    else               u2temp =  (((double)Uadc2 / cound_temp) - ADC9288_pol_diapasona);
-                }
-                else
-                {
-                    if (delitel==true) u1temp = CH1_delitel * ((double)Uadc1 - ADC9288_pol_diapasona);
-                    else               u1temp =((double)Uadc1 - ADC9288_pol_diapasona);
-                    if (delitel==true) u2temp = CH2_delitel * ((double)Uadc2 - ADC9288_pol_diapasona);
-                    else               u2temp = ((double)Uadc2 - ADC9288_pol_diapasona);
-                }
-                    U1 = u1temp;         
-                    U2 = u2temp;                                       
-            }
-       //================================================================================================
-            else
-            {
-                //================================================================================================  	        	
-                for (int i = 0; i < SIZE_BUF_SETTINGS; i++)
-                {
-                  if ((bufpoz - i) < 0) break;
-                  if ((byte)ADC_Buff[bufpoz - i] == (byte)'o')
-                  {
-                    if (((byte)ADC_Buff[(bufpoz-i)] == (byte)'o') &&
-                        ((byte)ADC_Buff[(bufpoz-i) + 1] == (byte)'s') &&
-                        ((byte)ADC_Buff[(bufpoz-i) + 2] == (byte)'c') &&
-                        ((byte)ADC_Buff[(bufpoz-i) + 3] == (byte)' ') &&
-                        ((byte)ADC_Buff[(bufpoz-i) + 4] == (byte)'v') &&
-                        ((byte)ADC_Buff[(bufpoz-i) + 5] == (byte)'3')) 
-                    {
-                        bufpoz = (bufpoz - i) + SIZE_BUF_SETTINGS;   
-                        readSettings(bufpoz);
+                    if (bufpoz < (ADC_Buff.length - ( 6 ))) {
+                        bufpoz = bufpoz + 2;
+                    } else {
                         break;
                     }
-                  }
+                }
+                
+                if (minmax == 0){
+                    minmax = 1;
+                }
+
+                if (grafic_type == TGraficType.AVERAGE) {
+                    if (delitel) {
+                        u1temp = CH1_delitel * (((double)Uadc1 / cound_temp) - ADC9288_pol_diapasona);
+                        u2temp = CH2_delitel * (((double)Uadc2 / cound_temp) - ADC9288_pol_diapasona);
+                    } else {
+                        u1temp =  (((double)Uadc1 / cound_temp) - ADC9288_pol_diapasona);
+                        u2temp =  (((double)Uadc2 / cound_temp) - ADC9288_pol_diapasona);
+                    }
+                } else {
+                    if (delitel) {
+                        u1temp = CH1_delitel * ((double)Uadc1 - ADC9288_pol_diapasona);
+                        u2temp = CH2_delitel * ((double)Uadc2 - ADC9288_pol_diapasona);
+                    } else {
+                        u1temp =((double)Uadc1 - ADC9288_pol_diapasona);
+                        u2temp = ((double)Uadc2 - ADC9288_pol_diapasona);
+                    }
+                }
+
+                U1 = u1temp;
+                U2 = u2temp;
+            } else {
+                //================================================================================================  	        	
+                for (int i = 0; i < SIZE_BUF_SETTINGS; i++) {
+                    if ((bufpoz - i) < 0) {
+                        break;
+                    }
+
+                    if (ADC_Buff[bufpoz - i] == (byte)'o') {
+                        if (ADC_Buff[(bufpoz-i)] == (byte)'o' &&
+                        ADC_Buff[(bufpoz-i) + 1] == (byte)'s' &&
+                        ADC_Buff[(bufpoz-i) + 2] == (byte)'c' &&
+                        ADC_Buff[(bufpoz-i) + 3] == (byte)' ' &&
+                        ADC_Buff[(bufpoz-i) + 4] == (byte)'v' &&
+                        ADC_Buff[(bufpoz-i) + 5] == (byte)'3') {
+                            bufpoz = (bufpoz - i) + SIZE_BUF_SETTINGS;
+                            readSettings(bufpoz);
+                            break;
+                        }
+                    }
                 }
             	//================================================================================================  
             	
-                if (ADC_Interleaved_mode == 0)
-                {
-                    V1 = (int)(ADC_Buff[bufpoz]&0xFF);        //прочитать из него символ    
-                    V2 = (int)(ADC_Buff[bufpoz + 1]&0xFF);      //прочитать из него символ  
-                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) Xpoz = Xpoz + 2;
+                if (ADC_Interleaved_mode == 0) {
+                    V1 = ADC_Buff[bufpoz] & 0xFF;        //прочитать из него символ
+                    V2 = ADC_Buff[bufpoz + 1] & 0xFF;      //прочитать из него символ
+
+                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) {
+                        Xpoz = Xpoz + 2;
+                    }
                     
-                    if (delitel==true) U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
-                    else               U1 = ((double)V1 - ADC9288_pol_diapasona);
-                    if (delitel==true) U2 = CH2_delitel * ((double)V2 - ADC9288_pol_diapasona);
-                    else               U2 = ((double)V2 - ADC9288_pol_diapasona);
-                }
-                else { 
-                    V1 = (int)(ADC_Buff[bufpoz]&0xFF);        //прочитать из него символ    
-                    V2 = (int)(ADC_Buff[bufpoz + 1]&0xFF);      //прочитать из него символ  
-                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) Xpoz = Xpoz + 2;
+                    if (delitel) {
+                        U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
+                        U2 = CH2_delitel * ((double)V2 - ADC9288_pol_diapasona);
+                    } else {
+                        U1 = ((double)V1 - ADC9288_pol_diapasona);
+                        U2 = ((double)V2 - ADC9288_pol_diapasona);
+                    }
+                } else {
+                    V1 = ADC_Buff[bufpoz] & 0xFF;        //прочитать из него символ
+                    V2 = ADC_Buff[bufpoz + 1] & 0xFF;      //прочитать из него символ
+
+                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) {
+                        Xpoz = Xpoz + 2;
+                    }
                     
-                    if (delitel==true) U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
-                    else               U1 = ((double)V1 - ADC9288_pol_diapasona);
-                    if (delitel==true) U2 = CH1_delitel * ((double)V2 - ADC9288_pol_diapasona);
-                    else               U2 = ((double)V2 - ADC9288_pol_diapasona);
+                    if (delitel) {
+                        U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
+                        U2 = CH1_delitel * ((double)V2 - ADC9288_pol_diapasona);
+                    } else {
+                        U1 = ((double)V1 - ADC9288_pol_diapasona);
+                        U2 = ((double)V2 - ADC9288_pol_diapasona);
+                    }
                 }
             }       
-       //================================================================================================
+            //================================================================================================
             dont_use_bufpoz=0;
             return 1;
-        }
-        else {
+        } else {
         	U1 = 0;
         	U2 = 0;
         	dont_use_bufpoz=0;
         	return 0;
-       }
+        }
     }	
     
     //================================================================================================
     //
     //================================================================================================
     //чтение буфера
-    private int readBuf()
-    {      
-        int V1=0, V2=0;        
+    private int readBuf() {
+        int V1=0, V2=0;
                
-       //================================================================================================  	
-       // if ((Xpoz + ( 6 + SIZE_BUF_SETTINGS) < ADC_Buff.length) && (Xpoz >= SIZE_BUF_SETTINGS) 
-       // 		&& (Xpoz + ( 6 + SIZE_BUF_SETTINGS)) < rxCount  )
-         if ((Xpoz + 2  < ADC_Buff.length) 
-        	&& (Xpoz + 2  < rxCount  ))       	
-        	
-        {
-       //================================================================================================  	        	
-//            for (int i = 0; i < SIZE_BUF_SETTINGS; i++)
-//            {
-//              if ((Xpoz - i) < 0) break;
-//              if ((byte)ADC_Buff[Xpoz - i] == (byte)'o')
-//              {
-//                if (((byte)ADC_Buff[(Xpoz-i)] == (byte)'o') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 1] == (byte)'s') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 2] == (byte)'c') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 3] == (byte)' ') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 4] == (byte)'v') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 5] == (byte)'3')) 
-//                {                                    
-//                    Xpoz = (Xpoz - i) + SIZE_BUF_SETTINGS; 
-//                    //readSettings(Xpoz);
-//                    break;
-//                }
-//              }
-//            }                  
-       //================================================================================================            
-       //================================================================================================
+        //================================================================================================
+        // if ((Xpoz + ( 6 + SIZE_BUF_SETTINGS) < ADC_Buff.length) && (Xpoz >= SIZE_BUF_SETTINGS)
+        // 		&& (Xpoz + ( 6 + SIZE_BUF_SETTINGS)) < rxCount  )
+        if ((Xpoz + 2  < ADC_Buff.length) && (Xpoz + 2  < rxCount  )) {
+            //================================================================================================
+            //            for (int i = 0; i < SIZE_BUF_SETTINGS; i++)
+            //            {
+            //              if ((Xpoz - i) < 0) break;
+            //              if ((byte)ADC_Buff[Xpoz - i] == (byte)'o')
+            //              {
+            //                if (((byte)ADC_Buff[(Xpoz-i)] == (byte)'o') &&
+            //                    ((byte)ADC_Buff[(Xpoz-i) + 1] == (byte)'s') &&
+            //                    ((byte)ADC_Buff[(Xpoz-i) + 2] == (byte)'c') &&
+            //                    ((byte)ADC_Buff[(Xpoz-i) + 3] == (byte)' ') &&
+            //                    ((byte)ADC_Buff[(Xpoz-i) + 4] == (byte)'v') &&
+            //                    ((byte)ADC_Buff[(Xpoz-i) + 5] == (byte)'3'))
+            //                {
+            //                    Xpoz = (Xpoz - i) + SIZE_BUF_SETTINGS;
+            //                    //readSettings(Xpoz);
+            //                    break;
+            //                }
+            //              }
+            //            }
+            //================================================================================================
+            //================================================================================================
    
-                if (ADC_Interleaved_mode == 0)
-                {
-                    V1 = (int)(ADC_Buff[Xpoz]&0xFF);        //прочитать из него символ    
-                    V2 = (int)(ADC_Buff[Xpoz + 1]&0xFF);      //прочитать из него символ  
-                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) Xpoz = Xpoz + 2;
-                    
-                     U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);                    
-                     U2 = CH2_delitel * ((double)V2 - ADC9288_pol_diapasona);
-                    
+            if (ADC_Interleaved_mode == 0) {
+                V1 = ADC_Buff[Xpoz] & 0xFF;        //прочитать из него символ
+                V2 = ADC_Buff[Xpoz + 1] & 0xFF;      //прочитать из него символ
+
+                if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) {
+                    Xpoz = Xpoz + 2;
                 }
-                else { 
-                    V1 = (int)(ADC_Buff[Xpoz]&0xFF);        //прочитать из него символ    
-                    V2 = (int)(ADC_Buff[Xpoz + 1]&0xFF);      //прочитать из него символ  
-                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) Xpoz = Xpoz + 2;
-                    
-                    U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);                    
-                    U2 = CH1_delitel * ((double)V2 - ADC9288_pol_diapasona);
+
+                U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
+                U2 = CH2_delitel * ((double)V2 - ADC9288_pol_diapasona);
+            } else {
+                V1 = ADC_Buff[Xpoz] & 0xFF;        //прочитать из него символ
+                V2 = ADC_Buff[Xpoz + 1] & 0xFF;      //прочитать из него символ
+
+                if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) {
+                    Xpoz = Xpoz + 2;
                 }
-                 
-       //================================================================================================
-            
+
+                U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
+                U2 = CH1_delitel * ((double)V2 - ADC9288_pol_diapasona);
+            }
+
             return 1;
-        }
-        else {
+        } else {
         	U1 = 0;
         	U2 = 0;        	
         	return 0;
