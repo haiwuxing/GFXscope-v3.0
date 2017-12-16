@@ -121,8 +121,8 @@
     <string name="t_plus">T+</string>      
     <string name="t_minus">T-</string>      
     <string name="sync_ch">CH1</string>      
-    <string name="t_free">Free</string>    
-     
+    <string name="t_free">Free</string>
+    <string name="t_flow">Поток</string>
     <string name="text_type_minmax">Тип усреднения</string>     
     <string name="type_minmax">Среднее</string>    
     

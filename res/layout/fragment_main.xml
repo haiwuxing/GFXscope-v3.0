@@ -9,11 +9,11 @@
 
     <com.jjoe64.graphview.GraphView
         android:id="@+id/OscillPlot"
+        title="Осциллограмма"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_marginBottom="65dp"
-        android:layout_marginRight="100dp"
-        title="Осциллограмма" />
+        android:layout_marginRight="100dp" />
     <!-- android:background="@drawable/oval_button" -->
 
     <SeekBar
@@ -188,7 +188,22 @@
         android:textColor="@color/White"
         android:textSize="20sp"
         android:visibility="invisible" />
-    
+    <Button
+        android:id="@+id/screen_bt_Tflow"
+        style="@style/ButtonTheme"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignTop="@+id/screen_bt_pause"
+        android:layout_marginBottom="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/t_flow"
+        android:textColor="@color/White"
+        android:textSize="20sp"
+        android:visibility="invisible"
+         />
+
     <Button
         android:id="@+id/ExitBtn"
         android:layout_width="85dp"
@@ -245,11 +260,11 @@
         android:layout_marginLeft="0dp"
         android:layout_marginTop="5dp"
         android:layout_toRightOf="@+id/seekBar_usync"
+        android:color="@color/White"
         android:gravity="left"
         android:text="@string/CH1avr"
         android:textColor="@color/ch1_color"
-        android:textSize="12sp"
-        android:color="@color/White" />
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/textView_CH1rms"
@@ -316,11 +331,11 @@
         android:layout_marginBottom="0dp"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="5dp"
+        android:color="@color/White"
         android:gravity="left"
         android:text="@string/CH2avr"
         android:textColor="@color/ch2_color"
-        android:textSize="12sp"
-        android:color="@color/White" />
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/textView_CH2rms"
@@ -394,9 +409,9 @@
         android:layout_width="@dimen/button2_width"
         android:layout_height="@dimen/button_height"
         android:layout_alignTop="@+id/T_auto"
-        android:layout_toRightOf="@+id/T_auto"
         android:layout_marginLeft="0dp"
-        android:layout_marginTop="0dp"      
+        android:layout_marginTop="0dp"
+        android:layout_toRightOf="@+id/T_auto"
         android:text="@string/CH1_auto"
         android:textColor="@color/White"
         android:textSize="12sp" />
@@ -406,9 +421,9 @@
         android:layout_width="@dimen/button2_width"
         android:layout_height="@dimen/button_height"
         android:layout_alignTop="@+id/CH1_auto"
-        android:layout_toRightOf="@+id/CH1_auto"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
+        android:layout_toRightOf="@+id/CH1_auto"
         android:text="@string/CH2_auto"
         android:textColor="@color/White"
         android:textSize="12sp" />
@@ -430,9 +445,9 @@
         android:layout_width="@dimen/button2_width"
         android:layout_height="@dimen/button_height"
         android:layout_alignTop="@+id/Sync_auto"
-        android:layout_toRightOf="@+id/Sync_auto"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
+        android:layout_toRightOf="@+id/Sync_auto"
         android:text="@string/sync_type"
         android:textColor="@color/White"
         android:textSize="12sp" />
@@ -442,9 +457,9 @@
         android:layout_width="@dimen/buttonACDC_width"
         android:layout_height="@dimen/button_height"
         android:layout_alignTop="@+id/Sync_type"
-        android:layout_toRightOf="@+id/Sync_type"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
+        android:layout_toRightOf="@+id/Sync_type"
         android:text="@string/CH1ACDC"
         android:textColor="@color/Green"
         android:textSize="12sp" />
@@ -453,9 +468,9 @@
         android:id="@+id/CH2_ACDC"
         android:layout_width="@dimen/buttonACDC_width"
         android:layout_height="@dimen/button_height"
+        android:layout_alignTop="@+id/CH1_ACDC"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
-        android:layout_alignTop="@+id/CH1_ACDC"
         android:layout_toRightOf="@+id/CH1_ACDC"
         android:text="@string/CH2ACDC"
         android:textColor="@color/Cyan"
@@ -466,9 +481,9 @@
         android:layout_width="@dimen/button_width"
         android:layout_height="@dimen/button_height"
         android:layout_alignTop="@+id/CH2_ACDC"
-        android:layout_toRightOf="@+id/CH2_ACDC"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
+        android:layout_toRightOf="@+id/CH2_ACDC"
         android:text="@string/start"
         android:textColor="@color/White"
         android:textSize="12sp" />
