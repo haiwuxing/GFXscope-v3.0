@@ -19,6 +19,9 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 //import android.media.AudioManager;
 //import android.media.ToneGenerator;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -63,11 +66,8 @@ private final static Handler mHandler = new Handler();
     private final static int OTSTUP_SPRAVA = 10;
     private final static int ILI9341_HEIGHT = 480;
     private final static int KOL_KLETOK_U = 10;
-//    private final int ADC_STM32_diapason =256;
     private final static int ADC_9288_diapason =256;
     private final static double ADC9288_pol_diapasona =128;//(ADC_9288_diapason/2);
-//    private final double  ADC_9288_NIn =1.245;
-//    private final double  ADC_STM32_Ref =2.495;
     private final static double  ADC_9288_Ref= 1.024;
     private final static double  AMP2_gain =10.0;
     private final static int freq0= 54000000;
@@ -81,6 +81,7 @@ private final static Handler mHandler = new Handler();
 	//private ProgressDialog dialog;
 	public static String currentUserName;
 	public static Editor prefEditor;
+    public static int SIZE_BUF_SETTINGS = 64;
     static float CH1_correct=1;
     static float CH2_correct=1;
     static SharedPreferences settings;
@@ -112,14 +113,10 @@ private static int Xpoz;
  private static Button screen_bt_Tplus = null;
  private static Button screen_bt_Tminus = null;
  private static Button send = null;
-//    private  boolean CH1_viev_RMS=false, CH2_viev_RMS=false;
     private static int rxCount;
-//    private static int rxIn;
-//    private static int rxOut;
     private static int rxCount_old;
     private static int scale_x=1;
     private volatile static int Xmax = Xmax_scale_x_max;
-    private static int SIZE_BUF_SETTINGS = 64;
     private static int SIZE_BUF_RX_for_MK = 100*1024;
     private static int SIZE_BUF_RX = 20*10*(SIZE_BUF_RX_for_MK+SIZE_BUF_SETTINGS);
     private static byte[] ADC_Buff = new byte[SIZE_BUF_RX];
@@ -151,8 +148,6 @@ private static int Xpoz;
     private static int auto_sinhros;
     private static int auto_CH1_Udel;
     private static int auto_CH2_Udel;
-//    private int manual_nachalo_buffer1;
-//    private int manual_nachalo_buffer2;
     private static byte disable_set_comands = 0;
     private static int settings_read_ok;
     private static int max_scale_t=32;
@@ -160,8 +155,6 @@ private static int Xpoz;
 private final int     adres_KOL_KLETOK_T=6;
 private final int     adres_ADC_freqH=7;
 private final int     adres_ADC_freqL=8;
-//private final int     adres_ADC_max_freqH=9;
-//private final int     adres_ADC_max_freqL=10;
 private final int     adres_screeen_osc_piksels=11;
 private final int     adres_ADC_Interleaved_mode=12;
 private final int     adres_CH1_n_delitel=13	;
@@ -172,7 +165,6 @@ private final int     adres_Usinhros=17	;
 private final int     adres_Usinhros_for_CH=18;
 private final int     adres_Usinhros_type=19	;
 private final int     adres_Uoffset_Chanal1=20;
-//    private int caunt_frq = 0;      
 private final int     adres_Uoffset_Chanal2=21;
 private final int     adres_scale_t=22;
 private final int     adres_scale_x=23	;
@@ -185,21 +177,9 @@ private final int     adres_CH1_correctL=29;
 private final int     adres_CH2_correctH=30;
 private final int     adres_CH2_correctL=31;
 private final int     TRACK_BAR_COEFF = 1000;
-//    private final static double  ADC_9288_delitel1 = ((ADC_9288_Ref*(50.0*100.0) )/(ADC_9288_diapason*AMP2_gain));//"50"
-//    private final static double  ADC_9288_delitel2 = ((ADC_9288_Ref*(20.0*100.0) )/(ADC_9288_diapason*AMP2_gain));//"20"
-//    private final static double  ADC_9288_delitel3 = ((ADC_9288_Ref*(10.0*100.0) )/(ADC_9288_diapason*AMP2_gain));//"10"
-//    private final static double  ADC_9288_delitel4 = ((ADC_9288_Ref*(5.0*100.0)  )/(ADC_9288_diapason*AMP2_gain));//"5"
-//    private final static double  ADC_9288_delitel5 = ((ADC_9288_Ref*(2.0*100.0)  )/(ADC_9288_diapason*AMP2_gain));//"2"
-//    private final static double  ADC_9288_delitel6 = ((ADC_9288_Ref*(1.0*100.0)  )/(ADC_9288_diapason*AMP2_gain));//"1"
-//    private final static double  ADC_9288_delitel7 = ((ADC_9288_Ref*50.0        )/(ADC_9288_diapason*AMP2_gain)) ;//"0.5"
-//    private final static double  ADC_9288_delitel8 = ((ADC_9288_Ref*20.0         )/(ADC_9288_diapason*AMP2_gain));//"0.2"
-//    private final static double  ADC_9288_delitel9 = ((ADC_9288_Ref*10.0         )/(ADC_9288_diapason*AMP2_gain));//"0.1"
-//    private final static double  ADC_9288_delitel10 =((ADC_9288_Ref*5.0         )/(ADC_9288_diapason*AMP2_gain)) ;//"50m"
-//    private final static double  ADC_9288_delitel11 =((ADC_9288_Ref*2.0         )/(ADC_9288_diapason*AMP2_gain)) ;//"20m"
-//    private final static double  ADC_9288_delitel12 =((ADC_9288_Ref*1.0         )/(ADC_9288_diapason*AMP2_gain)) ;//"10m"
-    private final int t0=16;;
+    private final int t0=16;
     private final int t1=32;
-        private final int t2=100;;
+    private final int t2=100;
     private final int t3=200;
     private final int t4=350;
     private final int t5=500;
@@ -236,9 +216,12 @@ private final int     TRACK_BAR_COEFF = 1000;
     private final int freq17= (int)((float)freq0*((float)t0/(float)t17));
     private final int freq18= (int)((float)freq0*((float)t0/(float)t18));
     private final int freq19 = (int)((float)freq0 * ((float)t0 / (float)t19));
+    byte[] wav_buff = new byte[(SIZE_BUF_RX_for_MK+SIZE_BUF_SETTINGS)];
+    int wav_buff_poz_read=0;
     float historicX = Float.NaN, historicY = Float.NaN;
     DataPoint[] ch1_values = new DataPoint[(int)(Xmax)];
     DataPoint[] ch2_values = new DataPoint[(int)(Xmax)];
+    Thread thread_play =null;
 private LineGraphSeries<DataPoint> series1;
 private LineGraphSeries<DataPoint> series2;
 private LineGraphSeries<DataPoint> series3;
@@ -293,10 +276,8 @@ private int count_bar;
 	private int error_bitrate=0;
     private float mLastTouchX;
     private float mLastTouchY;
-    //private float mPosX ;
-    //private float mPosY ;
     private  int tfree;
-	SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 	    @Override
 	    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 	    	if ((pause==1)&&(play==0)&&(fromUser==true)){
@@ -305,18 +286,17 @@ private int count_bar;
 	        	 Grafik_refresh(bufpoz, true);
 	    	}
 	    }
-
 	    @Override
 	    public void onStartTrackingTouch(SeekBar seekBar) {
 
 	    }
-
 	    @Override
 	    public void onStopTrackingTouch(SeekBar seekBar) {
             getRMS();
 	    }
 
 		};
+    private AudioTrack aTrack=null;
 	//======================================================================================================
 	private String CurrentFragmentTag = "fragment_main";
 
@@ -333,10 +313,6 @@ private int count_bar;
    //======================================================================================================
      public static  void osc_set_param(String param) {
   	   if (disable_set_comands == 1) return;
-
-//          if (mTcpClient != null) {
-//              mTcpClient.sendMessage(param + "\r\n");
-//          }
 
           TCPCommunicator.writeToSocket(param + "\r\n", UIHandler);
 
@@ -444,24 +420,9 @@ private int count_bar;
 	@Override
     public void onTCPMessageRecieved( byte[] bs) {
 
-//		Runnable runnable = new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				// TODO Auto-generated method stub
-//				try
-//				{
+				// TODO Auto-generated method stub
 
                 for (int i=0; i<bs.length; i++){
-
-//               	  if (rxCount<ADC_Buff.length){
-//        			  if (rxIn>=ADC_Buff.length)rxIn=0;
-//        			  ADC_Buff[rxIn]=bs[i];
-//                      rxIn++;
-//                      rxCount++;
-//                   }
-//               	    else while  (rxCount>=ADC_Buff.length);
-//                }
 
                     if (rxCount<ADC_Buff.length) 	{
                         	ADC_Buff[rxCount]=bs[i];
@@ -474,40 +435,25 @@ private int count_bar;
                         bufpoz=0;
                         }
                     }
-
-
-//				}
-//				catch(Exception e)
-//				{
-//
-//				}
-//			}
-//
-//		};
-//		Thread thread = new Thread(runnable);
-//		thread.start();
-
-
-
-		//getActivity().runOnUiThread(new Runnable() {
-        //    @Override
-        //    public void run() {
-
-         //   }
-       // });
-
-
-
      }
  
 	@Override
 	public void onTCPConnectionStatusChanged(boolean isConnectedNow) {
 		// TODO Auto-generated method stub
+
+
 		if(isConnectedNow)
 		{
 			Connecting=1;
+
+            int bufferSize = AudioTrack.getMinBufferSize(48000,
+                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_8BIT);
+             aTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                    48000, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_8BIT,
+                    bufferSize, AudioTrack.MODE_STREAM);
+            aTrack.play();
+
 //			Activity.runOnUiThread(new Runnable() {
-//
 //				@Override
 //				public void run() {
 //					// TODO Auto-generated method stub
@@ -517,81 +463,12 @@ private int count_bar;
 //			});
 
 		}
-		else Connecting=0;
+		else {
+		    Connecting=0;
+            if (aTrack!=null) aTrack.stop();
+        }
 	}
- 	
- 	
-//	@Override
-//	public void onTCPMessageRecieved(String message) {
-//		// TODO Auto-generated method stub
-//		final String theMessage=message;
-//		try {
-//			JSONObject obj = new JSONObject(message);
-//			String messageTypeString=obj.getString(EnumsAndStatics.MESSAGE_TYPE_FOR_JSON);
-//			MessageTypes messageType = EnumsAndStatics.getMessageTypeByString(messageTypeString);
-//			
-//			switch(messageType)
-//			{
-//
-//				case MessageFromServer:
-//				{
-//					
-//					runOnUiThread(new Runnable() {
-//						
-//						@Override
-//						public void run() {
-//							// TODO Auto-generated method stub
-//							EditText editTextFromServer =(EditText)findViewById(R.id.editTextFromServer);
-//							editTextFromServer.setText(theMessage);
-//						}
-//					});
-//				
-//			    	break;
-//				}
-//				 
-//				
-//			}
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
-//	}
 
-//======================================================================================================
-// public class ConnectTask extends AsyncTask<String, String, TcpClient> {
-//     @Override
-//     protected TcpClient doInBackground(String... message) {
-//         Log.d(LOG_TAG, "doInBackground 1");
-//         mTcpClient = new TcpClient(new TcpClient.OnMessageReceived() {
-//             @Override
-//             //here the messageReceived method is implemented
-//             public void messageReceived(byte[] bs) {
-//             	for (int i=0; i<bs.length; i++){
-//            		if (FragmentMain.rxCount<FragmentMain.ADC_Buff.length) 	{
-//            			FragmentMain.ADC_Buff[FragmentMain.rxCount]=bs[i];
-//            			FragmentMain.rxCount++;
-//            			}
-//            		else {
-//            			FragmentMain.rxCount=0;
-//            			FragmentMain.Xpoz=0;
-//            			FragmentMain.bufpoz=0;
-//            			//FragmentMain.rxCount_vivod=0;
-//            		}
-//            	}
-//             }
-//
-//			@Override
-//			public void messageReceived(String message) {
-//				// TODO Auto-generated method stub
-//
-//			}
-//         });
-//         mTcpClient.run();
-//         Log.d(LOG_TAG, "doInBackground 2");
-//         return null;
-//     }
-// }
  //======================================================================================================
 	public void SaveWurfs(String path)
 	{
@@ -662,16 +539,13 @@ private int count_bar;
 
                 @Override
                 public void run() {
-                	if (play==1){
+                	if (play==1) {
 
                     if (ADC_freq >= freq11)
                     {
-                      //if (( rxCount > temp_rxCount + size_buff)&&(rxCount >= size_buff * 2))
-                      //{
                         bufpoz = rxCount - size_buff * 2;
                         Grafik_refresh(bufpoz, true);
                         temp_rxCount = rxCount;
-                      //}
                     }
                     else
                     {
@@ -752,11 +626,11 @@ private int count_bar;
           rxCount_old = 0;
           bufpoz=0;
 
-          message = "get_buff 1";
+          if (stream_viev==0) message = "get_buff 1";
+          else  message = "get_buff 2";
+
           if (send!=null)send.setText("Стоп");
 
-          osc_set_param(message);
-          osc_set_param(message);
           osc_set_param(message);
           start();
         }
@@ -773,17 +647,7 @@ private int count_bar;
         osc_set_param(message);
         osc_set_param(message);
         osc_set_param(message);
-
-//		// ОТКЛЮЧИТЬСЯ
-//        if (mTcpClient != null) {
-//          	  mTcpClient.stopClient();
-//          	  mTcpClient = null;
-//        }
-
-//        TCPCommunicator.closeStreams();
-
         pause();
-
     }
 
     //======================================================================================================
@@ -877,9 +741,7 @@ private int count_bar;
 
              	         if (conect_begin()==1){
              	           osc_set_param("get_buff 1");
-             	           osc_set_param("get_buff 1");
-             	           osc_set_param("get_buff 1");
-             	           Log.d(LOG_TAG, "ПОДКЛЮЧИЛИСЬ");
+               	           Log.d(LOG_TAG, "ПОДКЛЮЧИЛИСЬ");
              	         }
                		 }
                	 }
@@ -892,9 +754,7 @@ private int count_bar;
             mHandler.postDelayed(mTimerBitrate_refresh, 1000);
         	}
 
-	       //if (mTcpClient == null) {
- 	            conect_begin();
- 	       //}
+ 	       conect_begin();
 
 	       if ((play==1)&&(pause==0)){
 	            start_refresh();
@@ -1430,7 +1290,7 @@ return;
 
                 dont_read_settings_waite();
 
-                if (stream_viev==0) {
+                if ((stream_viev==0) || (play==0)) {
                     stream_viev=1;
                     osc_set_param("stream_viev 1");
                     screen_bt_flow.setTextColor(Color.RED) ;
@@ -1438,11 +1298,63 @@ return;
                         conect_start();
                         osc_set_param("stream_viev 1");
                     }
+
+                    Runnable  Runnable_play = new Runnable() {
+                       public void run() {
+                            //do time consuming operations
+                       while((stream_viev==1)&& (play==1)) {
+                           if (rxCount > SIZE_BUF_RX_for_MK * 2) {
+                               int count = SIZE_BUF_RX_for_MK - 1;
+                               int i = 0;
+                               if (wav_buff_poz_read>rxCount)wav_buff_poz_read=rxCount;
+                               int wav_buff_poz_read_temp = wav_buff_poz_read;
+
+                               while (wav_buff_poz_read < rxCount) {
+                                   if ((byte) ADC_Buff[wav_buff_poz_read] == (byte) 'o') {
+                                       if (((byte) ADC_Buff[(wav_buff_poz_read)] == (byte) 'o') &&
+                                               ((byte) ADC_Buff[(wav_buff_poz_read) + 1] == (byte) 's') &&
+                                               ((byte) ADC_Buff[(wav_buff_poz_read) + 2] == (byte) 'c') &&
+                                               ((byte) ADC_Buff[(wav_buff_poz_read) + 3] == (byte) ' ') &&
+                                               ((byte) ADC_Buff[(wav_buff_poz_read) + 4] == (byte) 'v') &&
+                                               ((byte) ADC_Buff[(wav_buff_poz_read) + 5] == (byte) '3')) {
+                                           wav_buff_poz_read += SIZE_BUF_SETTINGS;
+                                           break;
+                                       }
+                                   }
+                                   wav_buff_poz_read++;
+                               }
+
+                               if (wav_buff_poz_read + count < rxCount) {
+                                   while (i < count) {
+                                       wav_buff[i] = ADC_Buff[wav_buff_poz_read];
+                                       i++;
+                                       wav_buff_poz_read++;
+                                   }
+                                   aTrack.write(wav_buff, 0, i);
+                               } else wav_buff_poz_read = wav_buff_poz_read_temp;
+                           }
+                       }
+
+                        }
+
+                    };
+
+                    thread_play = new Thread(Runnable_play);
+                    thread_play.start();
+
+
                 }
                 else {
                     stream_viev=0;
                     osc_set_param("stream_viev 0");
                     screen_bt_flow.setTextColor(Color.WHITE) ;
+
+                    if (thread_play != null) {
+                        Thread dummy = thread_play;
+                        thread_play = null;
+                        dummy.interrupt();
+                    }
+
                 }
             }
       });
@@ -2288,35 +2200,7 @@ return;
         }
 
         CH1_delitel= ((ADC_9288_Ref*u*100)/(ADC_9288_diapason*AMP2_gain))* CH1_correct;
-//        switch (CH1_n_delitel)
-//        {
-//            case (0): { CH1_delitel = ADC_9288_delitel6 * CH1_correct; }
-//                break;
-//            case (1): { CH1_delitel = ADC_9288_delitel1* CH1_correct; }
-//                break;
-//            case (2): { CH1_delitel = ADC_9288_delitel2* CH1_correct; }
-//                break;
-//            case (3): { CH1_delitel = ADC_9288_delitel3* CH1_correct; }
-//                break;
-//            case (4): { CH1_delitel = ADC_9288_delitel4* CH1_correct; }
-//                break;
-//            case (5): { CH1_delitel = ADC_9288_delitel5* CH1_correct; }
-//                break;
-//            case (6): { CH1_delitel = ADC_9288_delitel6* CH1_correct; }
-//                break;
-//            case (7): { CH1_delitel = ADC_9288_delitel7* CH1_correct; }
-//                break;
-//            case (8): { CH1_delitel = ADC_9288_delitel8* CH1_correct; }
-//                break;
-//            case (9): { CH1_delitel = ADC_9288_delitel9* CH1_correct; }
-//                break;
-//            case (10): { CH1_delitel = ADC_9288_delitel10* CH1_correct; }
-//                break;
-//            case (11): { CH1_delitel = ADC_9288_delitel11* CH1_correct; }
-//                break;
-//            case (12): { CH1_delitel = ADC_9288_delitel12* CH1_correct; }
-//                break;
-//        }
+
         if (CH1_n_delitel == 0)
         {
         	ADC_CH1_ON = 0;
@@ -2332,8 +2216,7 @@ return;
             	if (ch1_auto!=null) ch1_auto.setText(String.format("%.0f", u*1000) + "мВ");
             }
         }
-        //CH1_Umax = u;
-        //CH1_Umin = -u;
+
     }
 	
     //================================================================================================
@@ -2419,35 +2302,7 @@ return;
                 break;
         }
         CH2_delitel= ((ADC_9288_Ref*u*100)/(ADC_9288_diapason*AMP2_gain))* CH2_correct;
-//        switch (CH2_n_delitel)
-//        {
-//            case (0): { CH2_delitel = ADC_9288_delitel6 * CH2_correct; }
-//                break;
-//            case (1): { CH2_delitel = ADC_9288_delitel1* CH2_correct; }
-//                break;
-//            case (2): { CH2_delitel = ADC_9288_delitel2* CH2_correct; }
-//                break;
-//            case (3): { CH2_delitel = ADC_9288_delitel3* CH2_correct; }
-//                break;
-//            case (4): { CH2_delitel = ADC_9288_delitel4* CH2_correct; }
-//                break;
-//            case (5): { CH2_delitel = ADC_9288_delitel5* CH2_correct; }
-//                break;
-//            case (6): { CH2_delitel = ADC_9288_delitel6* CH2_correct; }
-//                break;
-//            case (7): { CH2_delitel = ADC_9288_delitel7* CH2_correct; }
-//                break;
-//            case (8): { CH2_delitel = ADC_9288_delitel8* CH2_correct; }
-//                break;
-//            case (9): { CH2_delitel = ADC_9288_delitel9* CH2_correct; }
-//                break;
-//            case (10): { CH2_delitel = ADC_9288_delitel10* CH2_correct; }
-//                break;
-//            case (11): { CH2_delitel = ADC_9288_delitel11* CH2_correct; }
-//                break;
-//            case (12): { CH2_delitel = ADC_9288_delitel12* CH2_correct; }
-//                break;
-//        }
+
         if (CH2_n_delitel == 0)
         {
         	ADC_CH2_ON = 0;
@@ -2463,8 +2318,7 @@ return;
             	if (ch2_auto!=null)ch2_auto.setText(String.format("%.0f", u*1000) + "мВ");
             }
         }
-        //CH2_Umax = u;
-        //CH2_Umin = -u;
+
     }
 
     //================================================================================================
@@ -2821,25 +2675,6 @@ return;
         	&& (Xpoz + 2  < rxCount  ))
 
         {
-       //================================================================================================
-//            for (int i = 0; i < SIZE_BUF_SETTINGS; i++)
-//            {
-//              if ((Xpoz - i) < 0) break;
-//              if ((byte)ADC_Buff[Xpoz - i] == (byte)'o')
-//              {
-//                if (((byte)ADC_Buff[(Xpoz-i)] == (byte)'o') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 1] == (byte)'s') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 2] == (byte)'c') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 3] == (byte)' ') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 4] == (byte)'v') &&
-//                    ((byte)ADC_Buff[(Xpoz-i) + 5] == (byte)'3'))
-//                {
-//                    Xpoz = (Xpoz - i) + SIZE_BUF_SETTINGS;
-//                    //readSettings(Xpoz);
-//                    break;
-//                }
-//              }
-//            }
        //================================================================================================
        //================================================================================================
 
@@ -3416,14 +3251,9 @@ else if(flagSINHRnull==4){
     //================================================================================================
     private int Grafik_refresh(int Xstart, boolean USync)
     {
-    	//long bufpoz_temp= bufpoz;
         byte sync_fall = 1;
-
         int Xstop;
         int Xmax_temp;
-
-        //if ((Xstart % 2)!=0) Xstart++;
-
         int start_temp = Xstart;
 
         if ((ADC_CH1_ON == 0) && (ADC_CH2_ON == 0)) return start_temp;
@@ -3444,43 +3274,20 @@ else if(flagSINHRnull==4){
             Xmax_temp = Xmax;
         }
 
-        //if ((Xstart % 2) != 0) Xstart++;
-//        if (Xstart + (Xmax_temp * scale_t * 2) > rxCount ){
-//        	if (rxCount > (Xmax_temp * scale_t * 2)) Xstart = rxCount - (Xmax_temp * scale_t * 2);
-//        	else return;
-//        }
-
-        if (Xstart > rxCount) Xstart = rxCount;
+        if (Xstart + size_buff > rxCount) {
+            if (rxCount>size_buff)   Xstart = rxCount-size_buff;
+            else return start_temp;
+        }
         if (Xstart < 0) Xstart = 0;
 
         Xstop = Xstart + size_buff;
         if (Xstop > rxCount)
         {
-            Xstop = rxCount;
+            if (stream_viev == 0) Xstop = rxCount;
+            else return start_temp;
         }
 
-//        if 	(Xstart>SIZE_BUF_SETTINGS*2){
-//        for (int i = 0; i < SIZE_BUF_SETTINGS*2; i++)
-//        {
-//          if ((Xstart - i) < 0) break;
-//          if ((byte)ADC_Buff[Xstart - i] == (byte)'o')
-//          {
-//            if (((byte)ADC_Buff[(Xstart-i)] == (byte)'o') &&
-//                ((byte)ADC_Buff[(Xstart-i) + 1] == (byte)'s') &&
-//                ((byte)ADC_Buff[(Xstart-i) + 2] == (byte)'c') &&
-//                ((byte)ADC_Buff[(Xstart-i) + 3] == (byte)' ') &&
-//                ((byte)ADC_Buff[(Xstart-i) + 4] == (byte)'v') &&
-//                ((byte)ADC_Buff[(Xstart-i) + 5] == (byte)'3'))
-//            {
-//            	Xstart = (Xstart - i) + SIZE_BUF_SETTINGS*2;
-//                readSettings(Xstart);
-//                break;
-//            }
-//          }
-//        }
-//        }
-//        else
-        	if 	(Xstart>SIZE_BUF_SETTINGS){
+        if 	(Xstart>SIZE_BUF_SETTINGS){
         for (int i = 0; i < SIZE_BUF_SETTINGS; i++)
         {
           if ((Xstart - i) < 0) break;
@@ -3529,6 +3336,7 @@ else if(flagSINHRnull==4){
                 }
                 Xstart++;
             }
+
             if (Xstart == rxCount)
             {
                 if (Xstart + size_buff > rxCount)
@@ -3536,7 +3344,6 @@ else if(flagSINHRnull==4){
                     if (rxCount > size_buff)
                     {
                         Xstart = rxCount - size_buff;
-
                         while (Xstart < rxCount)
                         {
                             if ((byte)ADC_Buff[Xstart] == (byte)'o')
@@ -3568,9 +3375,7 @@ else if(flagSINHRnull==4){
                     }
                     else return start_temp;
                 }
-            }
-
-
+           }
 
             start_temp = Xstart;
             if (ADC_Interleaved_mode == 0)
@@ -3628,8 +3433,10 @@ else if(flagSINHRnull==4){
 
         if (Xstop > rxCount)
         {
-            Xstop = rxCount;
+            if (stream_viev == 0) Xstop = rxCount;
+            else return start_temp;
         }
+
         Xpoz_for_RMS = Xstart;
         int j=0;
         minmax = 0;
@@ -3839,7 +3646,6 @@ else if(flagSINHRnull==4){
                disable_set_comands = 0;
    }
 
-//    private int n_line = 0, X1, X2;
     private enum TUsinhros_type {
      FRONT,
      FALL,

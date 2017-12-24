@@ -31,10 +31,10 @@ android {
 
     signingConfigs {
         release {
-//            storeFile file(System.getenv("KEYSTORE"))
-//            storePassword System.getenv("KEYSTORE_PASSWORD")
-//            keyAlias System.getenv("KEY_ALIAS")
-//            keyPassword System.getenv("KEY_PASSWORD")
+            storeFile file(System.getenv("KEYSTORE"))
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
         }
     }
 
@@ -74,7 +74,7 @@ android {
         targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
 
         versionCode 2
-        versionName "2.0.0"
+        versionName "1.0.21"
         applicationId "com.gfxscope" //TODO
     }
 
