@@ -9,6 +9,11 @@ import android.support.annotation.Nullable;
 import com.gfxscope.R;
 import com.utils.Utils;
 
+/**
+ * Created by Stormeg on 15.01.2018.
+ */
+
+@SuppressWarnings("DefaultFileTemplate")
 public enum  TGraficType implements Parcelable {
     AVERAGE, MINMAX;
 

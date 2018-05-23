@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -45,13 +44,18 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.models.Oscillogram;
+import com.models.OscillogramByteArray;
 import com.models.TGraficType;
+import com.utils.Constants;
 import com.utils.CrashUtils;
 import com.utils.Utils;
 import android.widget.VerticalSeekBar;
 
 public class FragmentMain extends Fragment implements TCPListener{
     public static final @NonNull String TAG = Utils.getTag(FragmentMain.class);
+
+    private final Oscillogram mOscillogram = new OscillogramByteArray(SIZE_BUF_RX);
 
     private static GraphView graph;
     private static Runnable mTimerScrollLeft;
@@ -175,7 +179,7 @@ public class FragmentMain extends Fragment implements TCPListener{
     private static int SIZE_BUF_SETTINGS = 64;
     private static int SIZE_BUF_RX_for_MK = 100 * 1024;
     private static int SIZE_BUF_RX = 20 * 10 * (SIZE_BUF_RX_for_MK + SIZE_BUF_SETTINGS);
-    private static byte[] ADC_Buff = new byte[SIZE_BUF_RX];
+    //private static byte[] ADC_Buff = new byte[SIZE_BUF_RX];
 
     private static int scale_t = 1;
     private static int scale_t_old = 1;
@@ -317,58 +321,12 @@ public class FragmentMain extends Fragment implements TCPListener{
     @Override
     @WorkerThread
     public void onTCPMessageRecieved(byte[] bs) {
-        for (final byte b : bs) {
-            if (rxCount < ADC_Buff.length) {
-                ADC_Buff[rxCount] = b;
-                rxCount++;
-            } else {
-                //noinspection StatementWithEmptyBody
-                while (dont_use_bufpoz == 1) {
-                    // empty
-                }
-
-                rxCount = 0;
-                bufpoz = 0;
-            }
-        }
+        this.mOscillogram.put(bs);
     }
 
     @Override
     public void onTCPConnectionStatusChanged(boolean isConnectedNow) {
         Connecting = isConnectedNow ? 1 : 0;
-    }
-
-    public void saveOscillogramToFile() {
-        //TODO show dialog with file name input
-        final String fileName = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US)
-                .format(Calendar.getInstance().getTime()) + ".OSC";
-
-        if (rxCount <= 0) {
-            Toast.makeText(this.getContext(), "rxCount <= 0", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        final File dir = new File(Environment.getExternalStorageDirectory(), "GFXscope");
-        if (!dir.isDirectory() && !dir.mkdirs()) {
-            Toast.makeText(this.getContext(), "The directory can not be created.\n" + dir.getAbsolutePath(), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        final String outputFilePath = dir.getAbsoluteFile() + File.separator + fileName;
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(outputFilePath);
-            fos.write(ADC_Buff, 0, rxCount);
-
-            Toast.makeText(this.getContext(),"Saved "
-                    + (rxCount < (1024*1024) ? (rxCount/1024) + "KB" : (rxCount/(1024*1024)) + "MB" )
-                    + "to " + outputFilePath, Toast.LENGTH_LONG).show();
-         } catch (Throwable t) {
-            CrashUtils.reportAndPrint(t);
-            Toast.makeText(this.getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
-        } finally {
-            Utils.closeSilently(fos);
-        }
     }
 
     private void pause() {
@@ -1238,8 +1196,17 @@ public class FragmentMain extends Fragment implements TCPListener{
 
         SaveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                saveOscillogramToFile();
+            public void onClick(final View view) {
+                if (Utils.isDeadFragment(FragmentMain.this)) {
+                    return;
+                }
+
+                //TODO show dialog with file name input
+                final File dir = new File(Environment.getExternalStorageDirectory(), "GFXscope");
+                final String fileName = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US)
+                        .format(Calendar.getInstance().getTime()) + ".OSC";
+
+                Toast.makeText(getContext(), mOscillogram.saveToFile(dir, fileName), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -2125,13 +2092,10 @@ public class FragmentMain extends Fragment implements TCPListener{
                 Uadc1 = Uadc2 = (minmax == 1) || (grafic_type == TGraficType.AVERAGE) ? 0 : 255;
 
                 for (int j = 0; j < scale_t; j ++) {
-                    if ((ADC_Buff[bufpoz] == (byte)'o') &&
-                    (ADC_Buff[bufpoz + 1] == (byte)'s') &&
-                    (ADC_Buff[bufpoz + 2] == (byte)'c') &&
-                    (ADC_Buff[bufpoz + 3] == (byte)' ') &&
-                    (ADC_Buff[bufpoz + 4] == (byte)'v') &&
-                    (ADC_Buff[bufpoz + 5] == (byte)'3')) {
-                        bufpoz = bufpoz + SIZE_BUF_SETTINGS;
+
+                    if (this.mOscillogram.checkStartAndIncreasePosition(bufpoz)) {
+                        //bufpoz = bufpoz + SIZE_BUF_SETTINGS;
+                        bufpoz = bufpoz + SIZE_BUF_SETTINGS - Constants.PROTOCOL_VERSION.length;
                         readSettings(bufpoz);
                     }
 
@@ -2202,36 +2166,19 @@ public class FragmentMain extends Fragment implements TCPListener{
                     }
                 }
 
-                if (ADC_Interleaved_mode == 0) {
-                    V1 = ADC_Buff[bufpoz] & 0xFF;        //прочитать из него символ
-                    V2 = ADC_Buff[bufpoz + 1] & 0xFF;      //прочитать из него символ
+                V1 = ADC_Buff[bufpoz] & 0xFF;        //прочитать из него символ
+                V2 = ADC_Buff[bufpoz + 1] & 0xFF;      //прочитать из него символ
 
-                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) {
-                        Xpoz = Xpoz + 2;
-                    }
+                if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) {
+                    Xpoz = Xpoz + 2;
+                }
 
-                    if (delitel) {
-                        U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
-                        U2 = CH2_delitel * ((double)V2 - ADC9288_pol_diapasona);
-                    } else {
-                        U1 = ((double)V1 - ADC9288_pol_diapasona);
-                        U2 = ((double)V2 - ADC9288_pol_diapasona);
-                    }
+                if (delitel) {
+                    U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
+                    U2 = CH1_delitel * ((double)V2 - ADC9288_pol_diapasona);
                 } else {
-                    V1 = ADC_Buff[bufpoz] & 0xFF;        //прочитать из него символ
-                    V2 = ADC_Buff[bufpoz + 1] & 0xFF;      //прочитать из него символ
-
-                    if ((Xpoz + 2 < ADC_Buff.length ) && (Xpoz + 2  < rxCount )) {
-                        Xpoz = Xpoz + 2;
-                    }
-
-                    if (delitel) {
-                        U1 = CH1_delitel * ((double)V1 - ADC9288_pol_diapasona);
-                        U2 = CH1_delitel * ((double)V2 - ADC9288_pol_diapasona);
-                    } else {
-                        U1 = ((double)V1 - ADC9288_pol_diapasona);
-                        U2 = ((double)V2 - ADC9288_pol_diapasona);
-                    }
+                    U1 = ((double)V1 - ADC9288_pol_diapasona);
+                    U2 = ((double)V2 - ADC9288_pol_diapasona);
                 }
             }
 

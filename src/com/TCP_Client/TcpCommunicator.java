@@ -135,7 +135,6 @@ public class TcpCommunicator {
                 
         @Override
         protected Void doInBackground(Void... params) {
-            mRun = true;
             try {
                  s = new Socket(getServerHost(), getServerPort());
                  //in = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -143,9 +142,10 @@ public class TcpCommunicator {
                  // Конвертируем потоки в другой тип, чтоб легче обрабатывать текстовые сообщения.
                  in = new DataInputStream(s.getInputStream());
                  
-                 for(TCPListener listener:allListeners)
-                        listener.onTCPConnectionStatusChanged(true);
-                 
+                 for (TCPListener listener:allListeners) {
+                     listener.onTcpConnectionStatusChanged(true);
+                 }
+
                 while(mRun) {
                         // count the available bytes form the input stream
                         int count = in.available();
